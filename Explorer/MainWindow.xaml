@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:graphsharp="clr-namespace:GraphSharp.Controls;assembly=GraphSharp.Controls"
+		xmlns:wpfextensions_Controls="clr-namespace:WPFExtensions.Controls;assembly=WPFExtensions"
         xmlns:local="clr-namespace:Explorer"
         mc:Ignorable="d"
         Title="MainWindow">
@@ -73,6 +75,12 @@
 			</StackPanel>
 		</HierarchicalDataTemplate>
 
+		<Style x:Key="MethodBodyLabelStyle"
+			   TargetType="TextBlock">
+			<Setter Property="FontWeight" Value="Bold" />
+			<Setter Property="Margin" Value="5" />
+		</Style>
+
 		<Style x:Key="MethodBodyTextStyle"
 			   TargetType="TextBox">
 			<Setter Property="IsReadOnly" Value="True" />
@@ -84,17 +92,13 @@
 			<Setter Property="ScrollViewer.CanContentScroll" Value="True" />
 		</Style>
 
-		<DataTemplate DataType="{x:Type local:DocumentViewModel}">
-			<TextBox Text="{Binding Text, Mode=OneWay}"
-					 BorderThickness="0"
-					 Style="{StaticResource MethodBodyTextStyle}" />
+		<DataTemplate DataType="{x:Type local:TextDocumentViewModel}">
+			<Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+				<TextBox Text="{Binding Text, Mode=OneWay}"
+						 Margin="5"
+						 Style="{StaticResource MethodBodyTextStyle}" />
+			</Grid>
 		</DataTemplate>
-
-		<Style x:Key="MethodBodyLabelStyle"
-			   TargetType="TextBlock">
-			<Setter Property="FontWeight" Value="Bold" />
-			<Setter Property="Margin" Value="5" />
-		</Style>
 
 		<DataTemplate DataType="{x:Type local:MethodDocumentViewModel}">
 			<DockPanel Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
@@ -102,7 +106,7 @@
 							  HorizontalAlignment="Stretch"
 							  ItemsSource="{Binding Bodies}">
 					<ItemsControl.ItemTemplate>
-						<DataTemplate DataType="{x:Type local:MethodBodyDocumentViewModel}">
+						<DataTemplate DataType="{x:Type local:MethodBodyViewModel}">
 							<CheckBox Content="{Binding Name}"
 									  IsChecked="{Binding IsVisible}"
 									  Margin="5" />
@@ -119,7 +123,7 @@
 			</DockPanel>
 		</DataTemplate>
 
-		<DataTemplate DataType="{x:Type local:MethodBodyDocumentViewModel}">
+		<DataTemplate DataType="{x:Type local:MethodBodyViewModel}">
 			<DockPanel>
 				<TextBlock DockPanel.Dock="Top"
 						   Text="{Binding Name}"
@@ -128,6 +132,72 @@
 				<TextBox Text="{Binding Text, Mode=OneWay}"
 						 Style="{StaticResource MethodBodyTextStyle}" />
 			</DockPanel>
+		</DataTemplate>
+
+		<DataTemplate DataType="{x:Type local:MethodGraphViewModel}">
+			<DockPanel>
+				<TextBlock DockPanel.Dock="Top"
+						   Text="{Binding Name}"
+						   Style="{StaticResource MethodBodyLabelStyle}" />
+
+				<wpfextensions_Controls:ZoomControl Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}">
+					<local:GraphLayout Graph="{Binding Graph}"
+								   Margin="5"
+								   LayoutAlgorithmType="EfficientSugiyama"
+								   OverlapRemovalAlgorithmType="FSA"
+								   HighlightAlgorithmType="Simple" />
+				</wpfextensions_Controls:ZoomControl>
+			</DockPanel>
+		</DataTemplate>
+
+		<Style TargetType="{x:Type graphsharp:VertexControl}">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type graphsharp:VertexControl}">
+						<Border BorderBrush="Black"
+								Background="White"
+								BorderThickness="2"
+								CornerRadius="10"
+								Padding="8">
+							<Expander IsExpanded="True">
+								<Expander.Header>
+									<TextBlock Text="{Binding Header}"
+											   FontWeight="Bold" />
+								</Expander.Header>
+								<ContentPresenter Content="{TemplateBinding Vertex}"
+												  Margin="0,5,0,0" />
+							</Expander>
+						</Border>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style TargetType="{x:Type graphsharp:EdgeControl}">
+			<Setter Property="Foreground" Value="Black" />
+			<Setter Property="ToolTip" Value="{Binding Label}" />
+		</Style>
+
+		<DataTemplate DataType="{x:Type local:VertexViewModelBase}">
+			<TextBox Text="{Binding Label, Mode=OneWay}"
+					 BorderThickness="0"
+					 Style="{StaticResource MethodBodyTextStyle}" />
+		</DataTemplate>
+
+		<DataTemplate DataType="{x:Type local:EdgeViewModelBase}">
+			<TextBlock Text="{Binding Label}"
+					   FontFamily="Consolas"
+					   FontSize="12" />
+		</DataTemplate>
+
+		<DataTemplate DataType="{x:Type local:GraphDocumentViewModel}">
+			<wpfextensions_Controls:ZoomControl Background="Transparent">
+				<local:GraphLayout Graph="{Binding Graph}"
+								   Margin="5"
+								   LayoutAlgorithmType="EfficientSugiyama"
+								   OverlapRemovalAlgorithmType="FSA"
+								   HighlightAlgorithmType="Simple" />
+			</wpfextensions_Controls:ZoomControl>
 		</DataTemplate>
 	</Window.Resources>
 

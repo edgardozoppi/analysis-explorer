@@ -1,5 +1,6 @@
 ﻿using Backend.Analyses;
 using Backend.Model;
+using Backend.Serialization;
 using Backend.Transformations;
 using Backend.Utils;
 using Model;
@@ -32,14 +33,14 @@ namespace Explorer
 		}
 	}
 
-	class DocumentViewModel : DocumentViewModelBase
+	class TextDocumentViewModel : DocumentViewModelBase
 	{
 		private string name;
 
 		public string Kind { get; private set; }
 		public string Text { get; private set; }
 
-		public DocumentViewModel(MainViewModel main, string kind, string name, string text)
+		public TextDocumentViewModel(MainViewModel main, string kind, string name, string text)
 			: base(main)
 		{
 			this.Kind = kind;
@@ -56,13 +57,13 @@ namespace Explorer
 	class MethodDocumentViewModel : DocumentViewModelBase
 	{
 		private MethodDefinition method;
-		private IList<MethodBodyDocumentViewModel> bodies;
+		private IList<MethodBodyViewModel> bodies;
 
 		public MethodDocumentViewModel(MainViewModel main, MethodDefinition method)
 			: base(main)
 		{
 			this.method = method;
-			this.bodies = new List<MethodBodyDocumentViewModel>();
+			this.bodies = new List<MethodBodyViewModel>();
 
 			Analyze();
 		}
@@ -72,7 +73,7 @@ namespace Explorer
 			get { return method.ToFullDisplayName(); }
 		}
 
-		public IEnumerable<MethodBodyDocumentViewModel> Bodies
+		public IEnumerable<MethodBodyViewModel> Bodies
 		{
 			get { return bodies; }
 		}
@@ -93,19 +94,23 @@ namespace Explorer
 			GenerateSSA(methodInfo);
 
 			var text = methodInfo.Get<string>("IL_TEXT");
-			var vm = new MethodBodyDocumentViewModel(this, "IL Bytecode", text);
+			var vm = new MethodBodyViewModel(this, "IL Bytecode", text);
 			bodies.Add(vm);
 
 			text = methodInfo.Get<string>("TAC_TEXT");
-			vm = new MethodBodyDocumentViewModel(this, "Three Address Code", text);
+			vm = new MethodBodyViewModel(this, "Three Address Code", text);
 			bodies.Add(vm);
 
 			text = methodInfo.Get<string>("WEBS_TEXT");
-			vm = new MethodBodyDocumentViewModel(this, "Webbed Three Address Code", text);
+			vm = new MethodBodyViewModel(this, "Webbed Three Address Code", text);
 			bodies.Add(vm);
 
 			text = methodInfo.Get<string>("SSA_TEXT");
-			vm = new MethodBodyDocumentViewModel(this, "Static Single Assignment", text);
+			vm = new MethodBodyViewModel(this, "Static Single Assignment", text);
+			bodies.Add(vm);
+
+			text = methodInfo.Get<string>("CFG_TEXT");
+			vm = new MethodGraphViewModel(this, "Control Flow Graph", text);
 			bodies.Add(vm);
 		}
 
@@ -156,7 +161,10 @@ namespace Explorer
 				var domFrontierAnalysis = new DominanceFrontierAnalysis(cfg);
 				domFrontierAnalysis.Analyze();
 
+				//var text = DGMLSerializer.Serialize(cfg);
+
 				methodInfo.Add("CFG", cfg);
+				//methodInfo.Add("CFG_TEXT", text);
 			}
 		}
 
@@ -183,6 +191,9 @@ namespace Explorer
 
 				var text = body.ToString();
 				methodInfo.Add("WEBS_TEXT", text);
+
+				//text = DGMLSerializer.Serialize(cfg);
+				//methodInfo.Set("CFG_TEXT", text);
 			}
 		}
 
@@ -211,11 +222,14 @@ namespace Explorer
 
 				var text = body.ToString();
 				methodInfo.Add("SSA_TEXT", text);
+
+				text = DGMLSerializer.Serialize(cfg);
+				methodInfo.Set("CFG_TEXT", text);
 			}
 		}
 	}
 
-	class MethodBodyDocumentViewModel : ViewModelBase
+	class MethodBodyViewModel : ViewModelBase
 	{
 		private MethodDocumentViewModel parent;
 		private bool isVisible;
@@ -223,7 +237,7 @@ namespace Explorer
 		public string Name { get; private set; }
 		public string Text { get; private set; }
 
-		public MethodBodyDocumentViewModel(MethodDocumentViewModel parent, string name, string text)
+		public MethodBodyViewModel(MethodDocumentViewModel parent, string name, string text)
 		{
 			this.Name = name;
 			this.Text = text;
@@ -239,6 +253,17 @@ namespace Explorer
 				SetProperty(ref isVisible, value);
 				parent.OnPropertyChanged(nameof(parent.VisibleBodies));
 			}
+		}
+	}
+
+	class MethodGraphViewModel : MethodBodyViewModel
+	{
+		public Graph Graph { get; private set; }
+
+		public MethodGraphViewModel(MethodDocumentViewModel parent, string name, string text)
+			: base(parent, name, text)
+		{
+			this.Graph = Extensions.CreateGraphFromDGML(text);
 		}
 	}
 }

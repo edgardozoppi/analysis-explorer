@@ -10,6 +10,7 @@ using Backend.Transformations;
 using Backend.Utils;
 using Backend.Analyses;
 using Backend.Model;
+using Backend.Serialization;
 
 namespace Explorer
 {
@@ -249,7 +250,7 @@ namespace Explorer
 
 			AddCommand("Show _IL", ModifierKeys.Control, Key.I, OnShowIL, OnCanShowBody);
 			AddCommand("Show _TAC", ModifierKeys.Control, Key.T, OnShowTAC, OnCanShowBody);
-			//AddCommand("Show _CFG", ModifierKeys.Control, Key.F, OnShowCFG, OnCanShowBody);
+			AddCommand("Show _CFG", ModifierKeys.Control, Key.F, OnShowCFG, OnCanShowBody);
 			AddCommand("Show _Webs", ModifierKeys.Control, Key.W, OnShowWebs, OnCanShowBody);
 			AddCommand("Show _SSA", ModifierKeys.Control, Key.S, OnShowSSA, OnCanShowBody);
 			//AddCommand("Show _PTG", ModifierKeys.Control, Key.P, OnShowPTG, OnCanShowBody);
@@ -288,7 +289,7 @@ namespace Explorer
 			GenerateIL(methodInfo);
 
 			var text = methodInfo.Get<string>("IL_TEXT");
-			var document = new DocumentViewModel(this.Main, "IL", this.FullName, text);
+			var document = new TextDocumentViewModel(this.Main, "IL", this.FullName, text);
 			this.Main.AddDocument(document);
 		}
 
@@ -298,7 +299,7 @@ namespace Explorer
 			GenerateTAC(methodInfo);
 
 			var text = methodInfo.Get<string>("TAC_TEXT");
-			var document = new DocumentViewModel(this.Main, "TAC", this.FullName, text);
+			var document = new TextDocumentViewModel(this.Main, "TAC", this.FullName, text);
 			this.Main.AddDocument(document);
 		}
 
@@ -308,7 +309,7 @@ namespace Explorer
 			GenerateWebs(methodInfo);
 
 			var text = methodInfo.Get<string>("WEBS_TEXT");
-			var document = new DocumentViewModel(this.Main, "Webs", this.FullName, text);
+			var document = new TextDocumentViewModel(this.Main, "Webs", this.FullName, text);
 			this.Main.AddDocument(document);
 		}
 
@@ -318,7 +319,17 @@ namespace Explorer
 			GenerateSSA(methodInfo);
 
 			var text = methodInfo.Get<string>("SSA_TEXT");
-			var document = new DocumentViewModel(this.Main, "SSA", this.FullName, text);
+			var document = new TextDocumentViewModel(this.Main, "SSA", this.FullName, text);
+			this.Main.AddDocument(document);
+		}
+
+		private void OnShowCFG(object obj)
+		{
+			var methodInfo = this.Main.ProgramAnalysisInfo.GetOrAdd(method);
+			GenerateCFG(methodInfo);
+
+			var text = methodInfo.Get<string>("CFG_TEXT");
+			var document = new GraphDocumentViewModel(this.Main, "CFG", this.FullName, text);
 			this.Main.AddDocument(document);
 		}
 
@@ -369,7 +380,10 @@ namespace Explorer
 				var domFrontierAnalysis = new DominanceFrontierAnalysis(cfg);
 				domFrontierAnalysis.Analyze();
 
+				var text = DGMLSerializer.Serialize(cfg);
+
 				methodInfo.Add("CFG", cfg);
+				methodInfo.Add("CFG_TEXT", text);
 			}
 		}
 
@@ -394,6 +408,9 @@ namespace Explorer
 
 				var text = body.ToString();
 				methodInfo.Add("WEBS_TEXT", text);
+
+				text = DGMLSerializer.Serialize(cfg);
+				methodInfo.Set("CFG_TEXT", text);
 			}
 		}
 
@@ -422,6 +439,9 @@ namespace Explorer
 
 				var text = body.ToString();
 				methodInfo.Add("SSA_TEXT", text);
+
+				text = DGMLSerializer.Serialize(cfg);
+				methodInfo.Set("CFG_TEXT", text);
 			}
 		}
 	}

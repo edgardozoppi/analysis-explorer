@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Explorer
 {
@@ -65,6 +66,39 @@ namespace Explorer
 					yield return separator();
 				}
 			}
+		}
+
+		public static Graph CreateGraphFromDGML(string dgml)
+		{
+			var vertices = new Dictionary<string, VertexViewModelBase>();
+			var graph = new Graph();
+			var xml = XDocument.Parse(dgml);
+			var ns = xml.Root.Name.Namespace;
+			var nodetag = string.Format("{{{0}}}Node", ns);
+			var linktag = string.Format("{{{0}}}Link", ns);
+
+			foreach (var node in xml.Descendants(nodetag))
+			{
+				var id = node.Attribute("Id").Value;
+				var label = node.Attribute("Label").Value;
+				var vertex = new VertexViewModelBase(id, label);
+
+				vertices.Add(id, vertex);
+				graph.AddVertex(vertex);
+			}
+
+			foreach (var node in xml.Descendants(linktag))
+			{
+				var sourceId = node.Attribute("Source").Value;
+				var targetId = node.Attribute("Target").Value;
+				var source = vertices[sourceId];
+				var target = vertices[targetId];
+				var edge = new EdgeViewModelBase(source, target);
+
+				graph.AddEdge(edge);
+			}
+
+			return graph;
 		}
 	}
 }
