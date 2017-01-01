@@ -99,7 +99,8 @@ namespace Explorer
 
 					var splitter = new GridSplitter()
 					{
-						HorizontalAlignment = HorizontalAlignment.Stretch
+						HorizontalAlignment = HorizontalAlignment.Stretch,
+						Background = Brushes.Transparent
 					};
 
 					grid.Children.Add(splitter);

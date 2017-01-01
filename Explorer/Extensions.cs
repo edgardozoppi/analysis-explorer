@@ -83,6 +83,8 @@ namespace Explorer
 				var label = node.Attribute("Label").Value;
 				var vertex = new VertexViewModelBase(id, label);
 
+				SetAttribute(node, "Background", value => vertex.BackgroundColor = value);
+
 				vertices.Add(id, vertex);
 				graph.AddVertex(vertex);
 			}
@@ -99,6 +101,16 @@ namespace Explorer
 			}
 
 			return graph;
+		}
+
+		private static void SetAttribute(XElement node, string name, Action<string> action)
+		{
+			var attribute = node.Attribute(name);
+
+			if (attribute != null)
+			{
+				action(attribute.Value);
+			}
 		}
 	}
 }

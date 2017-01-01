@@ -8,13 +8,13 @@ namespace Explorer
 		private Func<object, bool> OnCanExecute;
 		private Action<object> OnClose;
 
+		public event EventHandler CanExecuteChanged;
+
 		public DelegateCommand(Action<object> OnClose, Func<object, bool> OnCanExecute = null)
 		{
 			this.OnClose = OnClose;
 			this.OnCanExecute = OnCanExecute;
 		}
-
-		public event EventHandler CanExecuteChanged;
 
 		public bool CanExecute(object parameter)
 		{

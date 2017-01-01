@@ -58,11 +58,13 @@ namespace Explorer
 	{
 		public string Id { get; private set; }
 		public string Label { get; private set; }
+		public string BackgroundColor { get; set; }
 
 		public VertexViewModelBase(string id, string label)
 		{
 			this.Id = id;
 			this.Label = label;
+			this.BackgroundColor = "White";
 		}
 
 		public string Header

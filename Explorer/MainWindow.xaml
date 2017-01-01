@@ -4,12 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:graphsharp="clr-namespace:GraphSharp.Controls;assembly=GraphSharp.Controls"
-		xmlns:wpfextensions_Controls="clr-namespace:WPFExtensions.Controls;assembly=WPFExtensions"
+		xmlns:zoom="clr-namespace:GraphSharp.Controls.Zoom;assembly=GraphSharp.Controls"
         xmlns:local="clr-namespace:Explorer"
         mc:Ignorable="d"
-        Title="MainWindow">
+        Title="Analysis.NET Explorer"
+		Background="{DynamicResource ControlBackground}"
+		ResizeMode="CanResizeWithGrip">
 
 	<Window.Resources>
+		<local:UniversalValueConverter x:Key="UniversalValueConverter" />
 		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 		<local:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
 		<local:BooleanAndConverter x:Key="BooleanAndConverter" />
@@ -18,16 +21,27 @@
 								  Map="{StaticResource BooleanAndConverter}"
 								  Reduce="{StaticResource BooleanToVisibilityConverter}" />
 
+		
+		<SolidColorBrush x:Key="ControlBackground" Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}" />
+		<SolidColorBrush x:Key="WorkspaceBackground" Color="{DynamicResource {x:Static SystemColors.AppWorkspaceColorKey}}" />
 
-		<Style x:Key="MenuItemStyle"
-			   TargetType="MenuItem" >
-			<Setter Property="Command" Value="{Binding}" />
-			<Setter Property="Header" Value="{Binding Name}" />
-			<Setter Property="InputGestureText" Value="{Binding ShortcutText}" />
-		</Style>
+		<ResourceDictionary x:Key="MenuResources">
+			<local:MenuTemplateSelector x:Key="MenuTemplateSelector" />
+			
+			<DataTemplate x:Key="SeparatorMenuTemplate">
+				<Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}" />
+			</DataTemplate>
 
+			<Style TargetType="{x:Type MenuItem}">
+				<Setter Property="Command" Value="{Binding}" />
+				<Setter Property="Header" Value="{Binding Name}" />
+				<Setter Property="InputGestureText" Value="{Binding ShortcutText}" />
+			</Style>
+		</ResourceDictionary>
+		
 		<DataTemplate x:Key="ClosableTabItemTemplate">
-			<StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+			<StackPanel Orientation="Horizontal"
+						Margin="0,3,0,0">
 				<TextBlock Text="{Binding Kind}"
 						   Margin="0,0,0,0"
 						   FontWeight="Bold" />
@@ -55,13 +69,15 @@
 								  VerticalAlignment="Center"
 								  Margin="2" />
 				<StackPanel.Style>
-					<Style TargetType="StackPanel">
+					<Style TargetType="{x:Type StackPanel}">
 						<Style.Triggers>
 							<DataTrigger Binding="{Binding HasCommands}" Value="True">
 								<Setter Property="ContextMenu">
 									<Setter.Value>
 										<ContextMenu ItemsSource="{Binding Commands}"
-													 ItemContainerStyle="{StaticResource MenuItemStyle}" />
+													 UsesItemContainerTemplate="True"
+													 ItemContainerTemplateSelector="{DynamicResource MenuTemplateSelector}"
+													 Resources="{StaticResource MenuResources}" />
 									</Setter.Value>
 								</Setter>
 							</DataTrigger>
@@ -70,19 +86,21 @@
 				</StackPanel.Style>
 				<!--<StackPanel.ContextMenu>
 					<ContextMenu ItemsSource="{Binding Commands}"
-								 ItemContainerStyle="{StaticResource MenuItemStyle}" />
+								 UsesItemContainerTemplate="True"
+								 ItemContainerTemplateSelector="{DynamicResource MenuTemplateSelector}"
+								 Resources="{StaticResource MenuResources}" />
 				</StackPanel.ContextMenu>-->
 			</StackPanel>
 		</HierarchicalDataTemplate>
 
 		<Style x:Key="MethodBodyLabelStyle"
-			   TargetType="TextBlock">
+			   TargetType="{x:Type TextBlock}">
 			<Setter Property="FontWeight" Value="Bold" />
 			<Setter Property="Margin" Value="5" />
 		</Style>
 
 		<Style x:Key="MethodBodyTextStyle"
-			   TargetType="TextBox">
+			   TargetType="{x:Type TextBox}">
 			<Setter Property="IsReadOnly" Value="True" />
 			<Setter Property="FontFamily" Value="Consolas" />
 			<Setter Property="FontSize" Value="12" />
@@ -93,7 +111,8 @@
 		</Style>
 
 		<DataTemplate DataType="{x:Type local:TextDocumentViewModel}">
-			<Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+			<Grid Background="{StaticResource ControlBackground}"
+				  Margin="-1">
 				<TextBox Text="{Binding Text, Mode=OneWay}"
 						 Margin="5"
 						 Style="{StaticResource MethodBodyTextStyle}" />
@@ -101,10 +120,12 @@
 		</DataTemplate>
 
 		<DataTemplate DataType="{x:Type local:MethodDocumentViewModel}">
-			<DockPanel Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+			<DockPanel Background="{StaticResource ControlBackground}"
+					   Margin="-1">
 				<ItemsControl DockPanel.Dock="Top"
 							  HorizontalAlignment="Stretch"
-							  ItemsSource="{Binding Bodies}">
+							  ItemsSource="{Binding Bodies}"
+							  Margin="0,5,0,0">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate DataType="{x:Type local:MethodBodyViewModel}">
 							<CheckBox Content="{Binding Name}"
@@ -140,13 +161,13 @@
 						   Text="{Binding Name}"
 						   Style="{StaticResource MethodBodyLabelStyle}" />
 
-				<wpfextensions_Controls:ZoomControl Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}">
+				<zoom:ZoomControl Background="{StaticResource WorkspaceBackground}">
 					<local:GraphLayout Graph="{Binding Graph}"
-								   Margin="5"
-								   LayoutAlgorithmType="EfficientSugiyama"
-								   OverlapRemovalAlgorithmType="FSA"
-								   HighlightAlgorithmType="Simple" />
-				</wpfextensions_Controls:ZoomControl>
+									   Margin="5"
+									   LayoutAlgorithmType="EfficientSugiyama"
+									   OverlapRemovalAlgorithmType="FSA"
+									   HighlightAlgorithmType="Simple" />
+				</zoom:ZoomControl>
 			</DockPanel>
 		</DataTemplate>
 
@@ -154,19 +175,20 @@
 			<Setter Property="Template">
 				<Setter.Value>
 					<ControlTemplate TargetType="{x:Type graphsharp:VertexControl}">
-						<Border BorderBrush="Black"
-								Background="White"
-								BorderThickness="2"
-								CornerRadius="10"
-								Padding="8">
-							<Expander IsExpanded="True">
+						<Border BorderBrush="Gray"
+								Background="{Binding BackgroundColor, Converter={StaticResource UniversalValueConverter}}"
+								BorderThickness="1"
+								CornerRadius="5"
+								Padding="6">
+							<!--<Expander IsExpanded="True">
 								<Expander.Header>
 									<TextBlock Text="{Binding Header}"
 											   FontWeight="Bold" />
 								</Expander.Header>
 								<ContentPresenter Content="{TemplateBinding Vertex}"
 												  Margin="0,5,0,0" />
-							</Expander>
+							</Expander>-->
+							<ContentPresenter Content="{TemplateBinding Vertex}" />
 						</Border>
 					</ControlTemplate>
 				</Setter.Value>
@@ -174,13 +196,16 @@
 		</Style>
 
 		<Style TargetType="{x:Type graphsharp:EdgeControl}">
-			<Setter Property="Foreground" Value="Black" />
+			<Setter Property="Foreground" Value="Gray" />
+			<Setter Property="Fill" Value="Gray" />
+			<Setter Property="StrokeThickness" Value="1" />
 			<Setter Property="ToolTip" Value="{Binding Label}" />
 		</Style>
 
 		<DataTemplate DataType="{x:Type local:VertexViewModelBase}">
 			<TextBox Text="{Binding Label, Mode=OneWay}"
 					 BorderThickness="0"
+					 Background="Transparent"
 					 Style="{StaticResource MethodBodyTextStyle}" />
 		</DataTemplate>
 
@@ -191,21 +216,22 @@
 		</DataTemplate>
 
 		<DataTemplate DataType="{x:Type local:GraphDocumentViewModel}">
-			<wpfextensions_Controls:ZoomControl Background="Transparent">
+			<zoom:ZoomControl Background="{StaticResource WorkspaceBackground}">
 				<local:GraphLayout Graph="{Binding Graph}"
 								   Margin="5"
 								   LayoutAlgorithmType="EfficientSugiyama"
 								   OverlapRemovalAlgorithmType="FSA"
 								   HighlightAlgorithmType="Simple" />
-			</wpfextensions_Controls:ZoomControl>
+			</zoom:ZoomControl>
 		</DataTemplate>
 	</Window.Resources>
 
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*" MinWidth="100" />
@@ -215,36 +241,46 @@
 
 		<Menu Grid.Column="0"
 			  Grid.ColumnSpan="3"
-			  Grid.Row="0">
-			<MenuItem Header="_File">
-				<MenuItem DataContext="{Binding OpenCommand}" Style="{StaticResource MenuItemStyle}" />
-				<Separator />
-				<MenuItem DataContext="{Binding ExitCommand}" Style="{StaticResource MenuItemStyle}" />
-			</MenuItem>
+			  Grid.Row="0"
+			  Background="{StaticResource ControlBackground}">
+			<MenuItem Header="_File"
+					  ItemsSource="{Binding FileCommands}"
+					  UsesItemContainerTemplate="True"
+					  ItemContainerTemplateSelector="{DynamicResource MenuTemplateSelector}"
+					  Resources="{StaticResource MenuResources}" />
 		</Menu>
 
 		<ToolBar Grid.Column="0"
 				 Grid.ColumnSpan="3"
 				 Grid.Row="1"
 				 ToolBarTray.IsLocked="True"
-				 Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+				 Background="Transparent">
 			<Button Content="Test" />
 		</ToolBar>
 
 		<TreeView Grid.Column="0"
 				  Grid.Row="2"
-				  ItemsSource="{Binding Assemblies}" />
+				  ItemsSource="{Binding Assemblies}"
+				  local:TreeViewHelper.SelectedItem="{Binding ActiveItem}" />
 
 		<GridSplitter Grid.Column="1"
 					  Grid.Row="2"
-					  HorizontalAlignment="Stretch" />
+					  HorizontalAlignment="Stretch"
+					  Background="Transparent" />
 
 		<TabControl Grid.Column="2"
 					Grid.Row="2"
 					BorderThickness="0"
 					ItemsSource="{Binding Documents}"
 					ItemTemplate="{StaticResource ClosableTabItemTemplate}"
-					Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}"
+					Background="{StaticResource WorkspaceBackground}"
 					SelectedItem="{Binding ActiveDocument}" />
+
+		<StatusBar Grid.Column="0"
+				   Grid.ColumnSpan="3"
+				   Grid.Row="3"
+				   Background="Transparent">
+			<StatusBarItem Content="Ready" />
+		</StatusBar>
 	</Grid>
 </Window>

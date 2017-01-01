@@ -4,22 +4,29 @@ using System.Windows.Input;
 
 namespace Explorer
 {
-	class DelegateUICommand : DelegateCommand
+	class UIDelegateCommand : DelegateCommand
 	{
-		public DelegateUICommand(string name, Action<object> OnClose, Func<object, bool> OnCanExecute = null)
+		public string Name { get; private set; }
+		public KeyGesture Shortcut { get; private set; }
+		public string Category { get; private set; }
+
+		public UIDelegateCommand(string name, Action<object> OnClose, Func<object, bool> OnCanExecute = null)
 			: base(OnClose, OnCanExecute)
 		{
 			this.Name = name;
 		}
 
-		public DelegateUICommand(string name, KeyGesture shortcut, Action<object> OnClose, Func<object, bool> OnCanExecute = null)
+		public UIDelegateCommand(string name, KeyGesture shortcut, Action<object> OnClose, Func<object, bool> OnCanExecute = null)
 			: this(name, OnClose, OnCanExecute)
 		{
 			this.Shortcut = shortcut;
 		}
 
-		public string Name { get; private set; }
-		public KeyGesture Shortcut { get; private set; }
+		public UIDelegateCommand(string category, string name, KeyGesture shortcut, Action<object> OnClose, Func<object, bool> OnCanExecute = null)
+			: this(name, shortcut, OnClose, OnCanExecute)
+		{
+			this.Category = category;
+		}
 
 		public string ShortcutText
 		{

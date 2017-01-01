@@ -61,10 +61,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="WPFExtensions, Version=1.0.3437.34043, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\WPFExtensions.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -73,9 +69,11 @@
     </ApplicationDefinition>
     <Compile Include="Converters.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="MenuStyleSelector.cs" />
     <Compile Include="SplitContainer.xaml.cs">
       <DependentUpon>SplitContainer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TreeViewHelper.cs" />
     <Compile Include="ViewModels\GraphViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Page Include="MainWindow.xaml">

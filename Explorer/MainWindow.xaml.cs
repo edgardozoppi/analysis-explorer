@@ -43,6 +43,7 @@ namespace Explorer
 		{
 			foreach (var command in main.Commands)
 			{
+				if (command == null) continue;
 				var inputBinding = new InputBinding(command, command.Shortcut);
 				this.InputBindings.Add(inputBinding);
 			}

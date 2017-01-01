@@ -91,7 +91,8 @@ namespace Explorer
 			//GenerateTAC(methodInfo);
 			//GenerateCFG(methodInfo);
 			//GenerateWebs(methodInfo);
-			GenerateSSA(methodInfo);
+			//GenerateSSA(methodInfo);
+			GeneratePTG(methodInfo);
 
 			var text = methodInfo.Get<string>("IL_TEXT");
 			var vm = new MethodBodyViewModel(this, "IL Bytecode", text);
@@ -110,7 +111,11 @@ namespace Explorer
 			bodies.Add(vm);
 
 			text = methodInfo.Get<string>("CFG_TEXT");
-			vm = new MethodGraphViewModel(this, "Control Flow Graph", text);
+			vm = new MethodGraphViewModel(this, "Control-Flow Graph", text);
+			bodies.Add(vm);
+
+			text = methodInfo.Get<string>("PTG_TEXT");
+			vm = new MethodGraphViewModel(this, "Points-To Graph", text);
 			bodies.Add(vm);
 		}
 
@@ -147,6 +152,8 @@ namespace Explorer
 			if (!methodInfo.Contains("CFG"))
 			{
 				var body = methodInfo.Get<MethodBody>("TAC");
+
+				// Control-flow
 				var cfAnalysis = new ControlFlowAnalysis(body);
 				var cfg = cfAnalysis.GenerateNormalControlFlow();
 				//var cfg = cfAnalysis.GenerateExceptionalControlFlow();
@@ -227,6 +234,33 @@ namespace Explorer
 				methodInfo.Set("CFG_TEXT", text);
 			}
 		}
+
+		private void GeneratePTG(MethodAnalysisInfo methodInfo)
+		{
+			//GenerateIL(methodInfo);
+			//GenerateTAC(methodInfo);
+			//GenerateCFG(methodInfo);
+			//GenerateWebs(methodInfo);
+			GenerateSSA(methodInfo);
+
+			if (!methodInfo.Contains("PTG_TEXT"))
+			{
+				var cfg = methodInfo.Get<ControlFlowGraph>("CFG");
+
+				// Points-to
+				var pointsTo = new PointsToAnalysis(cfg, method);
+				var result = pointsTo.Analyze();
+
+				var ptg = result[cfg.Exit.Id].Output;
+				//ptg.RemoveVariablesExceptParameters();
+				//ptg.RemoveTemporalVariables();
+
+				var text = DGMLSerializer.Serialize(ptg);
+
+				methodInfo.Add("PTG", ptg);
+				methodInfo.Set("PTG_TEXT", text);
+			}
+		}
 	}
 
 	class MethodBodyViewModel : ViewModelBase
@@ -239,9 +273,9 @@ namespace Explorer
 
 		public MethodBodyViewModel(MethodDocumentViewModel parent, string name, string text)
 		{
+			this.parent = parent;
 			this.Name = name;
 			this.Text = text;
-			this.parent = parent;
 			this.isVisible = true;
 		}
 

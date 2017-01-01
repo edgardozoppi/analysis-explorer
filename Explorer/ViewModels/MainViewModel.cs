@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -16,21 +17,13 @@ namespace Explorer
 		private Host host;
 		private ILoader loader;
 
+		private ItemViewModelBase activeItem;
 		private DocumentViewModelBase activeDocument;
 
 		public ObservableCollection<AssemblyViewModel> Assemblies { get; private set; }
 		public ObservableCollection<DocumentViewModelBase> Documents { get; private set; }
-		public IList<DelegateUICommand> Commands { get; private set; }
+		public IList<UIDelegateCommand> Commands { get; private set; }
 		public ProgramAnalysisInfo ProgramAnalysisInfo { get; private set; }
-
-		public DocumentViewModelBase ActiveDocument
-		{
-			get { return activeDocument; }
-			set { SetProperty(ref activeDocument, value); }
-		}
-
-		public DelegateUICommand OpenCommand { get; private set; }
-		public DelegateUICommand ExitCommand { get; private set; }
 
 		public MainViewModel()
 		{
@@ -38,13 +31,45 @@ namespace Explorer
 			this.Documents = new ObservableCollection<DocumentViewModelBase>();
 			this.ProgramAnalysisInfo = new ProgramAnalysisInfo();
 
-			this.Commands = new List<DelegateUICommand>();
-			this.OpenCommand = AddCommand("_Open", ModifierKeys.Control, Key.O, OnOpen);
-			this.ExitCommand = AddCommand("_Exit", ModifierKeys.Alt, Key.F4, OnExit);
+			this.Commands = new List<UIDelegateCommand>();
+			AddCommand("File", "_Open", ModifierKeys.Control, Key.O, OnOpen);
+			AddSeparator();
+			AddCommand("File", "_Exit", ModifierKeys.Alt, Key.F4, OnExit);
 
 			host = new Host();
 			loader = new CCIProvider.Loader(host);
 			PlatformTypes.Resolve(host);
+		}
+
+		//public IEnumerable<ICommand> FileCommands
+		//{
+		//	get { return this.Commands.OfType<UIDelegateCommand>().Where(c => c.Category == "File"); }
+		//}
+
+		public IEnumerable<ICommand> FileCommands
+		{
+			get
+			{
+				return this.Commands.SkipWhile(c => c == null || c.Category != "File")
+									.TakeWhile(c => c == null || c.Category == "File");
+			}
+		}
+
+		public Host Host
+		{
+			get { return host; }
+		}
+
+		public ItemViewModelBase ActiveItem
+		{
+			get { return activeItem; }
+			set { SetProperty(ref activeItem, value); }
+		}
+
+		public DocumentViewModelBase ActiveDocument
+		{
+			get { return activeDocument; }
+			set { SetProperty(ref activeDocument, value); }
 		}
 
 		public void AddDocument(DocumentViewModelBase document)
@@ -86,12 +111,18 @@ namespace Explorer
 			var assembly = loader.LoadAssembly(fileName);
 			var vm = new AssemblyViewModel(this, assembly);
 			this.Assemblies.Add(vm);
+			this.ActiveItem = vm;
 		}
 
-		private DelegateUICommand AddCommand(string name, ModifierKeys modifiers, Key key, Action<object> action, Func<object, bool> enabled = null)
+		protected void AddSeparator()
+		{
+			this.Commands.Add(null);
+		}
+
+		private UIDelegateCommand AddCommand(string category, string name, ModifierKeys modifiers, Key key, Action<object> action, Func<object, bool> enabled = null)
 		{
 			var shortcut = new KeyGesture(key, modifiers);
-			var command = new DelegateUICommand(name, shortcut, action, enabled);
+			var command = new UIDelegateCommand(category, name, shortcut, action, enabled);
 			this.Commands.Add(command);
 			return command;
 		}

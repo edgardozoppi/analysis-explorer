@@ -11,6 +11,7 @@ using Backend.Utils;
 using Backend.Analyses;
 using Backend.Model;
 using Backend.Serialization;
+using System.Collections.Generic;
 
 namespace Explorer
 {
@@ -21,13 +22,13 @@ namespace Explorer
 		public abstract string Icon { get; }
 
 		public ObservableCollection<ItemViewModelBase> Childs { get; private set; }
-		public ObservableCollection<DelegateUICommand> Commands { get; private set; }
+		public ObservableCollection<UIDelegateCommand> Commands { get; private set; }
 
 		public ItemViewModelBase(MainViewModel main)
 		{
 			this.Main = main;
 			this.Childs = new ObservableCollection<ItemViewModelBase>();
-			this.Commands = new ObservableCollection<Explorer.DelegateUICommand>();
+			this.Commands = new ObservableCollection<UIDelegateCommand>();
 		}
 
 		public bool HasCommands
@@ -35,10 +36,15 @@ namespace Explorer
 			get { return this.Commands.Count > 0; }
 		}
 
-		protected DelegateUICommand AddCommand(string name, ModifierKeys modifiers, Key key, Action<object> action, Func<object, bool> enabled = null)
+		protected void AddSeparator()
+		{
+			this.Commands.Add(null);
+		}
+
+		protected UIDelegateCommand AddCommand(string name, ModifierKeys modifiers, Key key, Action<object> action, Func<object, bool> enabled = null)
 		{
 			var shortcut = new KeyGesture(key, modifiers);
-			var command = new DelegateUICommand(name, shortcut, action, enabled);
+			var command = new UIDelegateCommand(name, shortcut, action, enabled);
 			this.Commands.Add(command);
 			return command;
 		}
@@ -70,17 +76,19 @@ namespace Explorer
 	class AssemblyViewModel : ItemViewModelBase
 	{
 		private Assembly assembly;
+		private IDictionary<string, object> info;
 
 		public AssemblyViewModel(MainViewModel main, Assembly assembly)
 			: base(main)
 		{
 			this.assembly = assembly;
+			this.info = new Dictionary<string, object>();
 
 			var references = new ItemViewModel(main, "References", "reference");
 			this.Childs.Add(references);
 
 			//AddCommand("Show _CG", ModifierKeys.Control, Key.C, OnShowCG);
-			//AddCommand("Show _CH", ModifierKeys.Control, Key.H, OnShowCH);
+			AddCommand("Show _CH", ModifierKeys.Control, Key.H, OnShowCH);
 
 			foreach (var reference in assembly.References)
 			{
@@ -109,6 +117,34 @@ namespace Explorer
 		public override string Icon
 		{
 			get { return @"Images\assembly.png"; }
+		}
+
+		private void OnShowCH(object obj)
+		{
+			GenerateCH();
+
+			var text = GetInfo<string>("CH_TEXT");
+			var document = new GraphDocumentViewModel(this.Main, "CH", assembly.Name, text);
+			this.Main.AddDocument(document);
+		}
+
+		private void GenerateCH()
+		{
+			if (!info.ContainsKey("CH_TEXT"))
+			{
+				var ch = new ClassHierarchy();
+				ch.Analyze(assembly);
+
+				var text = DGMLSerializer.Serialize(ch);
+
+				info.Add("CH", ch);
+				info.Add("CH_TEXT", text);
+			}
+		}
+
+		private T GetInfo<T>(string key)
+		{
+			return (T)info[key];
 		}
 	}
 
@@ -247,13 +283,14 @@ namespace Explorer
 			this.method = method;
 
 			AddCommand("Show _Body", ModifierKeys.Control, Key.B, OnShowBody, OnCanShowBody);
-
+			AddSeparator();
 			AddCommand("Show _IL", ModifierKeys.Control, Key.I, OnShowIL, OnCanShowBody);
 			AddCommand("Show _TAC", ModifierKeys.Control, Key.T, OnShowTAC, OnCanShowBody);
-			AddCommand("Show _CFG", ModifierKeys.Control, Key.F, OnShowCFG, OnCanShowBody);
 			AddCommand("Show _Webs", ModifierKeys.Control, Key.W, OnShowWebs, OnCanShowBody);
 			AddCommand("Show _SSA", ModifierKeys.Control, Key.S, OnShowSSA, OnCanShowBody);
-			//AddCommand("Show _PTG", ModifierKeys.Control, Key.P, OnShowPTG, OnCanShowBody);
+			AddSeparator();
+			AddCommand("Show _CFG", ModifierKeys.Control, Key.F, OnShowCFG, OnCanShowBody);
+			AddCommand("Show _PTG", ModifierKeys.Control, Key.P, OnShowPTG, OnCanShowBody);
 			//AddCommand("Show _ESC", ModifierKeys.Control, Key.E, OnShowESC, OnCanShowBody);
 		}
 
@@ -333,6 +370,16 @@ namespace Explorer
 			this.Main.AddDocument(document);
 		}
 
+		private void OnShowPTG(object obj)
+		{
+			var methodInfo = this.Main.ProgramAnalysisInfo.GetOrAdd(method);
+			GeneratePTG(methodInfo);
+
+			var text = methodInfo.Get<string>("PTG_TEXT");
+			var document = new GraphDocumentViewModel(this.Main, "PTG", this.FullName, text);
+			this.Main.AddDocument(document);
+		}
+
 		private void GenerateIL(MethodAnalysisInfo methodInfo)
 		{
 			if (!methodInfo.Contains("IL_TEXT"))
@@ -366,6 +413,8 @@ namespace Explorer
 			if (!methodInfo.Contains("CFG"))
 			{
 				var body = methodInfo.Get<MethodBody>("TAC");
+
+				// Control-flow
 				var cfAnalysis = new ControlFlowAnalysis(body);
 				var cfg = cfAnalysis.GenerateNormalControlFlow();
 				//var cfg = cfAnalysis.GenerateExceptionalControlFlow();
@@ -397,6 +446,8 @@ namespace Explorer
 			{
 				var body = methodInfo.Get<MethodBody>("TAC");
 				var cfg = methodInfo.Get<ControlFlowGraph>("CFG");
+
+				// Webs
 				var splitter = new WebAnalysis(cfg);
 				splitter.Analyze();
 				splitter.Transform();
@@ -442,6 +493,33 @@ namespace Explorer
 
 				text = DGMLSerializer.Serialize(cfg);
 				methodInfo.Set("CFG_TEXT", text);
+			}
+		}
+
+		private void GeneratePTG(MethodAnalysisInfo methodInfo)
+		{
+			//GenerateIL(methodInfo);
+			//GenerateTAC(methodInfo);
+			//GenerateCFG(methodInfo);
+			//GenerateWebs(methodInfo);
+			GenerateSSA(methodInfo);
+
+			if (!methodInfo.Contains("PTG_TEXT"))
+			{
+				var cfg = methodInfo.Get<ControlFlowGraph>("CFG");
+
+				// Points-to
+				var pointsTo = new PointsToAnalysis(cfg, method);
+				var result = pointsTo.Analyze();
+
+				var ptg = result[cfg.Exit.Id].Output;
+				//ptg.RemoveVariablesExceptParameters();
+				//ptg.RemoveTemporalVariables();
+
+				var text = DGMLSerializer.Serialize(ptg);
+
+				methodInfo.Add("PTG", ptg);
+				methodInfo.Set("PTG_TEXT", text);
 			}
 		}
 	}
