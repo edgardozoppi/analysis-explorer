@@ -97,6 +97,8 @@ namespace Explorer
 				var target = vertices[targetId];
 				var edge = new EdgeViewModelBase(source, target);
 
+				SetAttribute(node, "Label", value => edge.Label = value);
+
 				graph.AddEdge(edge);
 			}
 

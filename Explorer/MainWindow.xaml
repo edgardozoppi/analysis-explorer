@@ -12,8 +12,8 @@
 		ResizeMode="CanResizeWithGrip">
 
 	<Window.Resources>
-		<local:UniversalValueConverter x:Key="UniversalValueConverter" />
 		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+		<local:UniversalValueConverter x:Key="UniversalValueConverter" />
 		<local:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
 		<local:BooleanAndConverter x:Key="BooleanAndConverter" />
 
@@ -21,13 +21,10 @@
 								  Map="{StaticResource BooleanAndConverter}"
 								  Reduce="{StaticResource BooleanToVisibilityConverter}" />
 
-		
 		<SolidColorBrush x:Key="ControlBackground" Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}" />
 		<SolidColorBrush x:Key="WorkspaceBackground" Color="{DynamicResource {x:Static SystemColors.AppWorkspaceColorKey}}" />
 
 		<ResourceDictionary x:Key="MenuResources">
-			<local:MenuTemplateSelector x:Key="MenuTemplateSelector" />
-			
 			<DataTemplate x:Key="SeparatorMenuTemplate">
 				<Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}" />
 			</DataTemplate>
@@ -37,6 +34,9 @@
 				<Setter Property="Header" Value="{Binding Name}" />
 				<Setter Property="InputGestureText" Value="{Binding ShortcutText}" />
 			</Style>
+
+			<local:MenuTemplateSelector x:Key="MenuTemplateSelector"
+										SeparatorTemplate="{StaticResource SeparatorMenuTemplate}" />
 		</ResourceDictionary>
 		
 		<DataTemplate x:Key="ClosableTabItemTemplate">
@@ -110,12 +110,47 @@
 			<Setter Property="ScrollViewer.CanContentScroll" Value="True" />
 		</Style>
 
+		<TextBox x:Key="CodeControl" x:Shared="False"
+				 Text="{Binding Text, Mode=OneWay}"
+				 Style="{StaticResource MethodBodyTextStyle}" />
+
+		<DockPanel x:Key="GraphControl" x:Shared="False">
+			<local:WrapPanelLastChildFill DockPanel.Dock="Top"
+										  Orientation="Horizontal"
+										  LastChildFill="True">
+				<TextBlock Text="Layout"
+						   FontWeight="Bold"
+						   Margin="5,0,5,5"
+						   VerticalAlignment="Center" />
+				
+				<ComboBox ItemsSource="{Binding LayoutAlgorithmFactory.AlgorithmTypes, Source={x:Reference GraphLayout}}"
+						  SelectedValue="{Binding LayoutType}"
+						  Margin="0,0,0,5" />
+			</local:WrapPanelLastChildFill>
+			
+			<zoom:ZoomControl Background="{StaticResource WorkspaceBackground}"
+							  BorderThickness="1">
+				<local:GraphLayout x:Name="GraphLayout"
+								   Graph="{Binding Graph}"
+								   LayoutAlgorithmType="{Binding LayoutType}"
+								   OverlapRemovalAlgorithmType="FSA"
+								   HighlightAlgorithmType="Simple" />
+			</zoom:ZoomControl>
+		</DockPanel>
+		
 		<DataTemplate DataType="{x:Type local:TextDocumentViewModel}">
 			<Grid Background="{StaticResource ControlBackground}"
 				  Margin="-1">
-				<TextBox Text="{Binding Text, Mode=OneWay}"
-						 Margin="5"
-						 Style="{StaticResource MethodBodyTextStyle}" />
+				<ContentPresenter Content="{StaticResource CodeControl}"
+								  Margin="5" />
+			</Grid>
+		</DataTemplate>
+
+		<DataTemplate DataType="{x:Type local:GraphDocumentViewModel}">
+			<Grid Background="{StaticResource ControlBackground}"
+				  Margin="-1">
+				<ContentPresenter Content="{StaticResource GraphControl}"
+								  Margin="5" />
 			</Grid>
 		</DataTemplate>
 
@@ -150,8 +185,7 @@
 						   Text="{Binding Name}"
 						   Style="{StaticResource MethodBodyLabelStyle}" />
 
-				<TextBox Text="{Binding Text, Mode=OneWay}"
-						 Style="{StaticResource MethodBodyTextStyle}" />
+				<ContentPresenter Content="{StaticResource CodeControl}" />
 			</DockPanel>
 		</DataTemplate>
 
@@ -160,18 +194,13 @@
 				<TextBlock DockPanel.Dock="Top"
 						   Text="{Binding Name}"
 						   Style="{StaticResource MethodBodyLabelStyle}" />
-
-				<zoom:ZoomControl Background="{StaticResource WorkspaceBackground}">
-					<local:GraphLayout Graph="{Binding Graph}"
-									   Margin="5"
-									   LayoutAlgorithmType="EfficientSugiyama"
-									   OverlapRemovalAlgorithmType="FSA"
-									   HighlightAlgorithmType="Simple" />
-				</zoom:ZoomControl>
+				
+				<ContentPresenter Content="{StaticResource GraphControl}" />
 			</DockPanel>
 		</DataTemplate>
 
 		<Style TargetType="{x:Type graphsharp:VertexControl}">
+			<Setter Property="ToolTip" Value="{Binding Header}" />
 			<Setter Property="Template">
 				<Setter.Value>
 					<ControlTemplate TargetType="{x:Type graphsharp:VertexControl}">
@@ -199,7 +228,7 @@
 			<Setter Property="Foreground" Value="Gray" />
 			<Setter Property="Fill" Value="Gray" />
 			<Setter Property="StrokeThickness" Value="1" />
-			<Setter Property="ToolTip" Value="{Binding Label}" />
+			<Setter Property="ToolTip" Value="{Binding Header}" />
 		</Style>
 
 		<DataTemplate DataType="{x:Type local:VertexViewModelBase}">
@@ -211,18 +240,9 @@
 
 		<DataTemplate DataType="{x:Type local:EdgeViewModelBase}">
 			<TextBlock Text="{Binding Label}"
+					   Foreground="Black"
 					   FontFamily="Consolas"
 					   FontSize="12" />
-		</DataTemplate>
-
-		<DataTemplate DataType="{x:Type local:GraphDocumentViewModel}">
-			<zoom:ZoomControl Background="{StaticResource WorkspaceBackground}">
-				<local:GraphLayout Graph="{Binding Graph}"
-								   Margin="5"
-								   LayoutAlgorithmType="EfficientSugiyama"
-								   OverlapRemovalAlgorithmType="FSA"
-								   HighlightAlgorithmType="Simple" />
-			</zoom:ZoomControl>
 		</DataTemplate>
 	</Window.Resources>
 

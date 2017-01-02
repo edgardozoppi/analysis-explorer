@@ -69,13 +69,14 @@
     </ApplicationDefinition>
     <Compile Include="Converters.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="MenuStyleSelector.cs" />
+    <Compile Include="MenuTemplateSelector.cs" />
     <Compile Include="SplitContainer.xaml.cs">
       <DependentUpon>SplitContainer.xaml</DependentUpon>
     </Compile>
     <Compile Include="TreeViewHelper.cs" />
     <Compile Include="ViewModels\GraphViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
+    <Compile Include="WrapPanelLastChildFill.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

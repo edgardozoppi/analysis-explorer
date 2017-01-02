@@ -124,7 +124,7 @@ namespace Explorer
 			GenerateCH();
 
 			var text = GetInfo<string>("CH_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "CH", assembly.Name, text);
+			var document = new GraphDocumentViewModel(this.Main, "CH", assembly.Name, text, "LinLog");
 			this.Main.AddDocument(document);
 		}
 
@@ -282,7 +282,7 @@ namespace Explorer
 		{
 			this.method = method;
 
-			AddCommand("Show _Body", ModifierKeys.Control, Key.B, OnShowBody, OnCanShowBody);
+			AddCommand("Show _All", ModifierKeys.Control, Key.A, OnShowAll, OnCanShowBody);
 			AddSeparator();
 			AddCommand("Show _IL", ModifierKeys.Control, Key.I, OnShowIL, OnCanShowBody);
 			AddCommand("Show _TAC", ModifierKeys.Control, Key.T, OnShowTAC, OnCanShowBody);
@@ -314,7 +314,7 @@ namespace Explorer
 			get { return @"Images\method.png"; }
 		}
 
-		private void OnShowBody(object obj)
+		private void OnShowAll(object obj)
 		{
 			var document = new MethodDocumentViewModel(this.Main, method);
 			this.Main.AddDocument(document);
@@ -366,7 +366,7 @@ namespace Explorer
 			GenerateCFG(methodInfo);
 
 			var text = methodInfo.Get<string>("CFG_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "CFG", this.FullName, text);
+			var document = new GraphDocumentViewModel(this.Main, "CFG", this.FullName, text, "EfficientSugiyama");
 			this.Main.AddDocument(document);
 		}
 
@@ -376,7 +376,7 @@ namespace Explorer
 			GeneratePTG(methodInfo);
 
 			var text = methodInfo.Get<string>("PTG_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "PTG", this.FullName, text);
+			var document = new GraphDocumentViewModel(this.Main, "PTG", this.FullName, text, "LinLog");
 			this.Main.AddDocument(document);
 		}
 

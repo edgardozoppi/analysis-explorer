@@ -73,6 +73,11 @@ namespace Explorer
 			get { return method.ToFullDisplayName(); }
 		}
 
+		public string Kind
+		{
+			get { return "All"; }
+		}
+
 		public IEnumerable<MethodBodyViewModel> Bodies
 		{
 			get { return bodies; }
@@ -111,11 +116,11 @@ namespace Explorer
 			bodies.Add(vm);
 
 			text = methodInfo.Get<string>("CFG_TEXT");
-			vm = new MethodGraphViewModel(this, "Control-Flow Graph", text);
+			vm = new MethodGraphViewModel(this, "Control-Flow Graph", text, "EfficientSugiyama");
 			bodies.Add(vm);
 
 			text = methodInfo.Get<string>("PTG_TEXT");
-			vm = new MethodGraphViewModel(this, "Points-To Graph", text);
+			vm = new MethodGraphViewModel(this, "Points-To Graph", text, "LinLog");
 			bodies.Add(vm);
 		}
 
@@ -292,12 +297,22 @@ namespace Explorer
 
 	class MethodGraphViewModel : MethodBodyViewModel
 	{
+		private string layoutType;
+
 		public Graph Graph { get; private set; }
 
-		public MethodGraphViewModel(MethodDocumentViewModel parent, string name, string text)
+		public MethodGraphViewModel(MethodDocumentViewModel parent, string name, string text, string layoutType)
 			: base(parent, name, text)
 		{
+			this.layoutType = layoutType;
+
 			this.Graph = Extensions.CreateGraphFromDGML(text);
+		}
+
+		public string LayoutType
+		{
+			get { return layoutType; }
+			set { SetProperty(ref layoutType, value); }
 		}
 	}
 }

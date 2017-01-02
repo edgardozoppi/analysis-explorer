@@ -19,19 +19,27 @@ namespace Explorer
 	class GraphDocumentViewModel : DocumentViewModelBase
 	{
 		private string name;
+		private string layoutType;
 
 		public string Kind { get; private set; }
 		public string DGML { get; private set; }
 		public Graph Graph { get; private set; }
 
-		public GraphDocumentViewModel(MainViewModel main, string kind, string name, string dgml)
+		public GraphDocumentViewModel(MainViewModel main, string kind, string name, string dgml, string layoutType)
 			: base(main)
 		{
 			this.Kind = kind;
 			this.name = name;
 			this.DGML = dgml;
+			this.layoutType = layoutType;
 
 			this.Graph = Extensions.CreateGraphFromDGML(dgml);
+		}
+
+		public string LayoutType
+		{
+			get { return layoutType; }
+			set { SetProperty(ref layoutType, value); }
 		}
 
 		public override string Name
@@ -44,13 +52,17 @@ namespace Explorer
 	{
 		public VertexViewModelBase Source { get; private set; }
 		public VertexViewModelBase Target { get; private set; }
-		public string Label { get; private set; }
+		public string Label { get; set; }
 
-		public EdgeViewModelBase(VertexViewModelBase source, VertexViewModelBase target, string label = null)
+		public EdgeViewModelBase(VertexViewModelBase source, VertexViewModelBase target)
 		{
 			this.Source = source;
 			this.Target = target;
-			this.Label = label;
+		}
+
+		public string Header
+		{
+			get { return string.Format("{0} -> {1}", this.Source.Header, this.Target.Header); }
 		}
 	}
 
