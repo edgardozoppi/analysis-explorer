@@ -12,6 +12,7 @@ using Backend.Analyses;
 using Backend.Model;
 using Backend.Serialization;
 using System.Collections.Generic;
+using GraphX.PCL.Common.Enums;
 
 namespace Explorer
 {
@@ -124,7 +125,7 @@ namespace Explorer
 			GenerateCH();
 
 			var text = GetInfo<string>("CH_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "CH", assembly.Name, text, "LinLog");
+			var document = new GraphDocumentViewModel(this.Main, "CH", assembly.Name, text, LayoutAlgorithmTypeEnum.LinLog);
 			this.Main.AddDocument(document);
 		}
 
@@ -366,7 +367,7 @@ namespace Explorer
 			GenerateCFG(methodInfo);
 
 			var text = methodInfo.Get<string>("CFG_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "CFG", this.FullName, text, "EfficientSugiyama");
+			var document = new GraphDocumentViewModel(this.Main, "CFG", this.FullName, text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
 			this.Main.AddDocument(document);
 		}
 
@@ -376,7 +377,7 @@ namespace Explorer
 			GeneratePTG(methodInfo);
 
 			var text = methodInfo.Get<string>("PTG_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "PTG", this.FullName, text, "LinLog");
+			var document = new GraphDocumentViewModel(this.Main, "PTG", this.FullName, text, LayoutAlgorithmTypeEnum.LinLog);
 			this.Main.AddDocument(document);
 		}
 

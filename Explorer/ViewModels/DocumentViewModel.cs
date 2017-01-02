@@ -3,6 +3,7 @@ using Backend.Model;
 using Backend.Serialization;
 using Backend.Transformations;
 using Backend.Utils;
+using GraphX.PCL.Common.Enums;
 using Model;
 using Model.Types;
 using System;
@@ -116,11 +117,11 @@ namespace Explorer
 			bodies.Add(vm);
 
 			text = methodInfo.Get<string>("CFG_TEXT");
-			vm = new MethodGraphViewModel(this, "Control-Flow Graph", text, "EfficientSugiyama");
+			vm = new MethodGraphViewModel(this, "Control-Flow Graph", text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
 			bodies.Add(vm);
 
 			text = methodInfo.Get<string>("PTG_TEXT");
-			vm = new MethodGraphViewModel(this, "Points-To Graph", text, "LinLog");
+			vm = new MethodGraphViewModel(this, "Points-To Graph", text, LayoutAlgorithmTypeEnum.LinLog);
 			bodies.Add(vm);
 		}
 
@@ -297,22 +298,20 @@ namespace Explorer
 
 	class MethodGraphViewModel : MethodBodyViewModel
 	{
-		private string layoutType;
+		public GraphLogic LogicCore { get; private set; }
 
-		public Graph Graph { get; private set; }
-
-		public MethodGraphViewModel(MethodDocumentViewModel parent, string name, string text, string layoutType)
+		public MethodGraphViewModel(MethodDocumentViewModel parent, string name, string text, LayoutAlgorithmTypeEnum layoutType)
 			: base(parent, name, text)
 		{
-			this.layoutType = layoutType;
-
-			this.Graph = Extensions.CreateGraphFromDGML(text);
-		}
-
-		public string LayoutType
-		{
-			get { return layoutType; }
-			set { SetProperty(ref layoutType, value); }
+			this.LogicCore = new GraphLogic()
+			{
+				DefaultLayoutAlgorithm = layoutType,
+				DefaultOverlapRemovalAlgorithm = OverlapRemovalAlgorithmTypeEnum.FSA,
+				DefaultEdgeRoutingAlgorithm = EdgeRoutingAlgorithmTypeEnum.SimpleER,
+				EdgeCurvingEnabled = true,
+				EnableParallelEdges = true,
+				Graph = Extensions.CreateGraphFromDGML(text)
+			};
 		}
 	}
 }

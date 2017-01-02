@@ -17,7 +17,7 @@ namespace Explorer
 			if (this.PropertyChanged != null)
 			{
 				var args = new PropertyChangedEventArgs(propertyName);
-				this.PropertyChanged.Invoke(this, args);
+				this.PropertyChanged(this, args);
 			}
 		}
 

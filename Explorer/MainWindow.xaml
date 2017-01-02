@@ -3,8 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-		xmlns:graphsharp="clr-namespace:GraphSharp.Controls;assembly=GraphSharp.Controls"
-		xmlns:zoom="clr-namespace:GraphSharp.Controls.Zoom;assembly=GraphSharp.Controls"
+		xmlns:graphx="clr-namespace:GraphX.Controls;assembly=GraphX.WPF.Controls"
         xmlns:local="clr-namespace:Explorer"
         mc:Ignorable="d"
         Title="Analysis.NET Explorer"
@@ -122,20 +121,19 @@
 						   FontWeight="Bold"
 						   Margin="5,0,5,5"
 						   VerticalAlignment="Center" />
-				
-				<ComboBox ItemsSource="{Binding LayoutAlgorithmFactory.AlgorithmTypes, Source={x:Reference GraphLayout}}"
-						  SelectedValue="{Binding LayoutType}"
+
+				<ComboBox ItemsSource="{Binding LayoutAlgorithmTypes, Source={x:Reference GraphArea}}"
+						  SelectedValue="{Binding LayoutAlgorithmType, Source={x:Reference GraphArea}}"
 						  Margin="0,0,0,5" />
 			</local:WrapPanelLastChildFill>
 			
-			<zoom:ZoomControl Background="{StaticResource WorkspaceBackground}"
-							  BorderThickness="1">
-				<local:GraphLayout x:Name="GraphLayout"
-								   Graph="{Binding Graph}"
-								   LayoutAlgorithmType="{Binding LayoutType}"
-								   OverlapRemovalAlgorithmType="FSA"
-								   HighlightAlgorithmType="Simple" />
-			</zoom:ZoomControl>
+			<graphx:ZoomControl Background="{StaticResource WorkspaceBackground}"
+								ViewFinderVisibility="Collapsed"
+								BorderThickness="1">
+				<local:GraphArea x:Name="GraphArea"
+								 LogicCore="{Binding LogicCore}"
+								 LayoutAlgorithmTypeChanged="GraphArea_LayoutAlgorithmTypeChanged" />
+			</graphx:ZoomControl>
 		</DockPanel>
 		
 		<DataTemplate DataType="{x:Type local:TextDocumentViewModel}">
@@ -199,11 +197,10 @@
 			</DockPanel>
 		</DataTemplate>
 
-		<Style TargetType="{x:Type graphsharp:VertexControl}">
-			<Setter Property="ToolTip" Value="{Binding Header}" />
+		<Style TargetType="{x:Type graphx:VertexControl}">
 			<Setter Property="Template">
 				<Setter.Value>
-					<ControlTemplate TargetType="{x:Type graphsharp:VertexControl}">
+					<ControlTemplate TargetType="{x:Type graphx:VertexControl}">
 						<Border BorderBrush="Gray"
 								Background="{Binding BackgroundColor, Converter={StaticResource UniversalValueConverter}}"
 								BorderThickness="1"
@@ -224,11 +221,21 @@
 			</Setter>
 		</Style>
 
-		<Style TargetType="{x:Type graphsharp:EdgeControl}">
+		<Style TargetType="{x:Type graphx:EdgeControl}">
 			<Setter Property="Foreground" Value="Gray" />
-			<Setter Property="Fill" Value="Gray" />
 			<Setter Property="StrokeThickness" Value="1" />
-			<Setter Property="ToolTip" Value="{Binding Header}" />
+			<Setter Property="ShowLabel" Value="True" />
+		</Style>
+
+		<Style TargetType="{x:Type graphx:AttachableEdgeLabelControl}">
+			<Setter Property="DisplayForSelfLoopedEdges" Value="True" />
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type graphx:AttachableEdgeLabelControl}">
+						<ContentPresenter Content="{Binding AttachNode.Edge}"/>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
 		</Style>
 
 		<DataTemplate DataType="{x:Type local:VertexViewModelBase}">

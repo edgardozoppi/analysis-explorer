@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 using System.Xml.Linq;
 
 namespace Explorer
@@ -113,6 +115,33 @@ namespace Explorer
 			{
 				action(attribute.Value);
 			}
+		}
+
+		public static T FindVisualParent<T>(this DependencyObject child)
+			where T : DependencyObject
+		{
+			T result = null;
+			// get parent item
+			var parentObject = VisualTreeHelper.GetParent(child);
+
+			// we’ve reached the end of the tree
+			if (parentObject != null)
+			{
+				// check if the parent matches the type we’re looking for
+				T parent = parentObject as T;
+
+				if (parent != null)
+				{
+					result = parent;
+				}
+				else
+				{
+					// use recursion to proceed with next level
+					result = FindVisualParent<T>(parentObject);
+				}
+			}
+
+			return result;
 		}
 	}
 }

@@ -49,6 +49,17 @@ namespace Explorer
 			}
 		}
 
+		private void GraphArea_LayoutAlgorithmTypeChanged(object sender, EventArgs e)
+		{
+			var graphArea = sender as DependencyObject;
+			var zoomControl = graphArea.FindVisualParent<GraphX.Controls.ZoomControl>();
+
+			if (zoomControl != null)
+			{
+				zoomControl.ZoomToFill();
+			}
+		}
+
 		// Borrar referencia a System.Drawing.dll
 		//private void Test(string fileName)
 		//{

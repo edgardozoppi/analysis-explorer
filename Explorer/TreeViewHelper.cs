@@ -15,7 +15,7 @@ namespace Explorer
 
 		// Using a DependencyProperty as the backing store for SelectedItem. This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty SelectedItemProperty =
-			DependencyProperty.RegisterAttached("SelectedItem", typeof(object), typeof(TreeViewHelper), new UIPropertyMetadata(OnSelectedItemChanged));
+			DependencyProperty.RegisterAttached("SelectedItem", typeof(object), typeof(TreeViewHelper), new PropertyMetadata(OnSelectedItemChanged));
 
 		public static object GetSelectedItem(DependencyObject obj)
 		{
