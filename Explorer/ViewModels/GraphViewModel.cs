@@ -59,11 +59,6 @@ namespace Explorer
 			this.Source = source;
 			this.Target = target;
 		}
-
-		public string Header
-		{
-			get { return string.Format("{0} -> {1}", this.Source.Header, this.Target.Header); }
-		}
 	}
 
 	public class VertexViewModelBase : ViewModelBase
@@ -77,11 +72,6 @@ namespace Explorer
 			this.Id = id;
 			this.Label = label;
 			this.BackgroundColor = "White";
-		}
-
-		public string Header
-		{
-			get { return string.Format("Node #{0}", this.Id); }
 		}
 	}
 
