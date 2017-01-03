@@ -26,15 +26,8 @@ namespace Explorer
 			this.Kind = kind;
 			this.DGML = dgml;
 
-			this.LogicCore = new GraphLogic()
-			{
-				DefaultLayoutAlgorithm = layoutType,
-				DefaultOverlapRemovalAlgorithm = OverlapRemovalAlgorithmTypeEnum.FSA,
-				DefaultEdgeRoutingAlgorithm = EdgeRoutingAlgorithmTypeEnum.SimpleER,
-				EdgeCurvingEnabled = true,
-				EnableParallelEdges = true,
-				Graph = Extensions.CreateGraphFromDGML(dgml)
-			};
+			var graph = Extensions.CreateGraphFromDGML(dgml);
+			this.LogicCore = new GraphLogic(graph, layoutType);
 		}
 
 		public override string Name

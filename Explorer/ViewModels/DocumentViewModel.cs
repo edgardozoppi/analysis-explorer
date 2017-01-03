@@ -303,15 +303,8 @@ namespace Explorer
 		public MethodGraphViewModel(MethodDocumentViewModel parent, string name, string text, LayoutAlgorithmTypeEnum layoutType)
 			: base(parent, name, text)
 		{
-			this.LogicCore = new GraphLogic()
-			{
-				DefaultLayoutAlgorithm = layoutType,
-				DefaultOverlapRemovalAlgorithm = OverlapRemovalAlgorithmTypeEnum.FSA,
-				DefaultEdgeRoutingAlgorithm = EdgeRoutingAlgorithmTypeEnum.SimpleER,
-				EdgeCurvingEnabled = true,
-				EnableParallelEdges = true,
-				Graph = Extensions.CreateGraphFromDGML(text)
-			};
+			var graph = Extensions.CreateGraphFromDGML(text);
+			this.LogicCore = new GraphLogic(graph, layoutType);
 		}
 	}
 }

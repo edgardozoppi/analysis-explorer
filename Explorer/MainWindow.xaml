@@ -232,7 +232,7 @@
 			<Setter Property="Template">
 				<Setter.Value>
 					<ControlTemplate TargetType="{x:Type graphx:AttachableEdgeLabelControl}">
-						<ContentPresenter Content="{Binding AttachNode.Edge}"/>
+						<ContentPresenter Content="{Binding AttachNode.Edge}" />
 					</ControlTemplate>
 				</Setter.Value>
 			</Setter>
