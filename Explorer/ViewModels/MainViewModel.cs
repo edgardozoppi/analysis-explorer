@@ -1,4 +1,8 @@
-﻿using Backend.Utils;
+﻿using Backend.Analyses;
+using Backend.Model;
+using Backend.Serialization;
+using Backend.Transformations;
+using Backend.Utils;
 using Microsoft.Win32;
 using Model;
 using Model.Types;
@@ -16,6 +20,7 @@ namespace Explorer
 	{
 		private Host host;
 		private ILoader loader;
+		private ProgramAnalysisInfo programAnalysisInfo;
 
 		private ItemViewModelBase activeItem;
 		private DocumentViewModelBase activeDocument;
@@ -23,13 +28,11 @@ namespace Explorer
 		public ObservableCollection<AssemblyViewModel> Assemblies { get; private set; }
 		public ObservableCollection<DocumentViewModelBase> Documents { get; private set; }
 		public IList<UIDelegateCommand> Commands { get; private set; }
-		public ProgramAnalysisInfo ProgramAnalysisInfo { get; private set; }
 
 		public MainViewModel()
 		{
 			this.Assemblies = new ObservableCollection<AssemblyViewModel>();
 			this.Documents = new ObservableCollection<DocumentViewModelBase>();
-			this.ProgramAnalysisInfo = new ProgramAnalysisInfo();
 
 			this.Commands = new List<UIDelegateCommand>();
 			AddCommand("File", "_Open", ModifierKeys.Control, Key.O, OnOpen);
@@ -38,6 +41,8 @@ namespace Explorer
 
 			host = new Host();
 			loader = new CCIProvider.Loader(host);
+			programAnalysisInfo = new ProgramAnalysisInfo();
+
 			PlatformTypes.Resolve(host);
 		}
 
@@ -78,11 +83,167 @@ namespace Explorer
 			this.ActiveDocument = document;
 		}
 
+		public T GetMethodInfo<T>(MethodDefinition method, string key)
+		{
+			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+			return methodInfo.Get<T>(key);
+		}
+
+		public void GenerateIL(MethodDefinition method)
+		{
+			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+
+			if (!methodInfo.Contains("IL_TEXT"))
+			{
+				var text = method.Body.ToString();
+
+				methodInfo.Add("IL_TEXT", text);
+			}
+		}
+
+		public void GenerateTAC(MethodDefinition method)
+		{
+			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+
+			GenerateIL(method);
+
+			if (!methodInfo.Contains("TAC_TEXT"))
+			{
+				var dissasembler = new Disassembler(method);
+				method.Body = dissasembler.Execute();
+				var text = method.Body.ToString();
+
+				methodInfo.Add("TAC_TEXT", text);
+			}
+		}
+
+		public void GenerateCFG(MethodDefinition method)
+		{
+			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+
+			//GenerateIL(method);
+			GenerateTAC(method);
+
+			if (!methodInfo.Contains("CFG"))
+			{
+				// Control-flow
+				var cfAnalysis = new ControlFlowAnalysis(method.Body);
+				var cfg = cfAnalysis.GenerateNormalControlFlow();
+				//var cfg = cfAnalysis.GenerateExceptionalControlFlow();
+
+				var domAnalysis = new DominanceAnalysis(cfg);
+				domAnalysis.Analyze();
+				domAnalysis.GenerateDominanceTree();
+
+				var loopAnalysis = new NaturalLoopAnalysis(cfg);
+				loopAnalysis.Analyze();
+
+				var domFrontierAnalysis = new DominanceFrontierAnalysis(cfg);
+				domFrontierAnalysis.Analyze();
+
+				//var text = DGMLSerializer.Serialize(cfg);
+
+				methodInfo.Add("CFG", cfg);
+				//methodInfo.Add("CFG_TEXT", text);
+			}
+		}
+
+		public void GenerateWebs(MethodDefinition method)
+		{
+			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+
+			//GenerateIL(method);
+			//GenerateTAC(method);
+			GenerateCFG(method);
+
+			if (!methodInfo.Contains("WEBS_TEXT"))
+			{
+				var cfg = methodInfo.Get<ControlFlowGraph>("CFG");
+
+				// Webs
+				var splitter = new WebAnalysis(cfg);
+				splitter.Analyze();
+				splitter.Transform();
+
+				method.Body.UpdateVariables();
+
+				var typeAnalysis = new TypeInferenceAnalysis(cfg);
+				typeAnalysis.Analyze();
+
+				var text = method.Body.ToString();
+				methodInfo.Add("WEBS_TEXT", text);
+
+				//text = DGMLSerializer.Serialize(cfg);
+				//methodInfo.Set("CFG_TEXT", text);
+			}
+		}
+
+		public void GenerateSSA(MethodDefinition method)
+		{
+			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+
+			//GenerateIL(method);
+			//GenerateTAC(method);
+			//GenerateCFG(method);
+			GenerateWebs(method);
+
+			if (!methodInfo.Contains("SSA_TEXT"))
+			{
+				var cfg = methodInfo.Get<ControlFlowGraph>("CFG");
+
+				// Live Variables
+				var liveVariables = new LiveVariablesAnalysis(cfg);
+				liveVariables.Analyze();
+
+				// SSA
+				var ssa = new StaticSingleAssignment(method.Body, cfg);
+				ssa.Transform();
+				ssa.Prune(liveVariables);
+
+				method.Body.UpdateVariables();
+
+				var text = method.Body.ToString();
+				methodInfo.Add("SSA_TEXT", text);
+
+				text = DGMLSerializer.Serialize(cfg);
+				methodInfo.Set("CFG_TEXT", text);
+			}
+		}
+
+		public void GeneratePTG(MethodDefinition method)
+		{
+			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+
+			//GenerateIL(method);
+			//GenerateTAC(method);
+			//GenerateCFG(method);
+			//GenerateWebs(method);
+			GenerateSSA(method);
+
+			if (!methodInfo.Contains("PTG_TEXT"))
+			{
+				var cfg = methodInfo.Get<ControlFlowGraph>("CFG");
+
+				// Points-to
+				var pointsTo = new PointsToAnalysis(cfg, method);
+				var result = pointsTo.Analyze();
+
+				var ptg = result[cfg.Exit.Id].Output;
+				//ptg.RemoveVariablesExceptParameters();
+				//ptg.RemoveTemporalVariables();
+
+				var text = DGMLSerializer.Serialize(ptg);
+
+				methodInfo.Set("PTG_TEXT", text);
+			}
+		}
+
 		private void OnOpen(object obj)
 		{
+#if DEBUG
 			LoadAssembly(@"C:\Users\Edgar\Projects\Consume-Net\Tool2\Input\Samples.exe");
 			return;
-
+#endif
 			var dialog = new OpenFileDialog()
 			{
 				Multiselect = true,
