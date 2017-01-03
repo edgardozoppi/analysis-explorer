@@ -88,7 +88,7 @@ namespace Explorer
 			var references = new ItemViewModel(main, "References", "reference");
 			this.Childs.Add(references);
 
-			//AddCommand("Show _CG", ModifierKeys.Control, Key.C, OnShowCG);
+			AddCommand("Show _CG", ModifierKeys.Control, Key.C, OnShowCG);
 			AddCommand("Show _CH", ModifierKeys.Control, Key.H, OnShowCH);
 
 			foreach (var reference in assembly.References)
@@ -129,6 +129,15 @@ namespace Explorer
 			this.Main.AddDocument(document);
 		}
 
+		private void OnShowCG(object obj)
+		{
+			GenerateCG();
+
+			var text = GetInfo<string>("CG_TEXT");
+			var document = new GraphDocumentViewModel(this.Main, "CG", assembly.Name, text, LayoutAlgorithmTypeEnum.LinLog);
+			this.Main.AddDocument(document);
+		}
+
 		private void GenerateCH()
 		{
 			if (!info.ContainsKey("CH_TEXT"))
@@ -140,6 +149,23 @@ namespace Explorer
 
 				info.Add("CH", ch);
 				info.Add("CH_TEXT", text);
+			}
+		}
+
+		private void GenerateCG()
+		{
+			GenerateCH();
+
+			if (!info.ContainsKey("CG_TEXT"))
+			{
+				var ch = GetInfo<ClassHierarchy>("CH");
+				var cga = new ClassHierarchyAnalysis(this.Main.Host, ch);
+				var cg = cga.Analyze(assembly);
+
+				var text = DGMLSerializer.Serialize(cg);
+
+				info.Add("CG", cg);
+				info.Add("CG_TEXT", text);
 			}
 		}
 
