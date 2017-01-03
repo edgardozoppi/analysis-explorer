@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace Explorer
 {
-	public class MenuTemplateSelector : ItemContainerTemplateSelector
+	public class MenuItemTemplateSelector : ItemContainerTemplateSelector
 	{
 		public DataTemplate SeparatorTemplate { get; set; }
 
@@ -23,6 +23,27 @@ namespace Explorer
 			else
 			{
 				result = base.SelectTemplate(item, parentItemsControl);
+			}
+
+			return result;
+		}
+	}
+
+	public class ToolBarItemTemplateSelector : DataTemplateSelector
+	{
+		public DataTemplate SeparatorTemplate { get; set; }
+
+		public override DataTemplate SelectTemplate(object item, DependencyObject container)
+		{
+			DataTemplate result;
+
+			if (item == null)
+			{
+				result = this.SeparatorTemplate;
+			}
+			else
+			{
+				result = base.SelectTemplate(item, container);
 			}
 
 			return result;

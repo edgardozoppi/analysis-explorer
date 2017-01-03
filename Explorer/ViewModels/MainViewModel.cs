@@ -35,7 +35,7 @@ namespace Explorer
 			this.Documents = new ObservableCollection<DocumentViewModelBase>();
 
 			this.Commands = new List<UIDelegateCommand>();
-			AddCommand("File", "_Open", ModifierKeys.Control, Key.O, OnOpen);
+			AddCommand("File|ToolBar", "_Open", ModifierKeys.Control, Key.O, OnOpen);
 			AddSeparator();
 			AddCommand("File", "_Exit", ModifierKeys.Alt, Key.F4, OnExit);
 
@@ -55,8 +55,23 @@ namespace Explorer
 		{
 			get
 			{
-				return this.Commands.SkipWhile(c => c == null || c.Category != "File")
-									.TakeWhile(c => c == null || c.Category == "File");
+				return this.Commands.SkipWhile(c => c == null || !c.Category.Contains("File"))
+									.TakeWhile(c => c == null || c.Category.Contains("File"));
+			}
+		}
+
+		public IEnumerable<ICommand> ToolBarCommands
+		{
+			get
+			{
+				var commands = this.Commands.SkipWhile(c => c == null || !c.Category.Contains("ToolBar"))
+											.TakeWhile(c => c == null || c.Category.Contains("ToolBar"));
+				if (activeItem != null)
+				{
+					commands = commands.Concat(activeItem.Commands);
+				}
+
+				return commands;
 			}
 		}
 
@@ -68,7 +83,11 @@ namespace Explorer
 		public ItemViewModelBase ActiveItem
 		{
 			get { return activeItem; }
-			set { SetProperty(ref activeItem, value); }
+			set
+			{
+				SetProperty(ref activeItem, value);
+				OnPropertyChanged(nameof(this.ToolBarCommands));
+			}
 		}
 
 		public DocumentViewModelBase ActiveDocument
