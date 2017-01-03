@@ -103,7 +103,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\ItemViewModel.cs" />
-    <Compile Include="DelegateUICommand.cs" />
+    <Compile Include="UIDelegateCommand.cs" />
     <Compile Include="DelegateCommand.cs" />
     <Compile Include="ViewModels\DocumentViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />

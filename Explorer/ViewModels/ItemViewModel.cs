@@ -168,7 +168,7 @@ namespace Explorer
 				};
 
 				var roots = assembly.GetRootMethods();
-				var cg = cga.Analyze(roots);
+				var cg = cga.Analyze(this.Main.Host, roots);
 				var text = DGMLSerializer.Serialize(cg);
 
 				info.Add("CG_TEXT", text);

@@ -34,10 +34,25 @@
 				<Setter Property="InputGestureText" Value="{Binding ShortcutText}" />
 			</Style>
 
-			<local:MenuTemplateSelector x:Key="MenuTemplateSelector"
-										SeparatorTemplate="{StaticResource SeparatorMenuTemplate}" />
+			<local:MenuItemTemplateSelector x:Key="MenuItemTemplateSelector"
+											SeparatorTemplate="{StaticResource SeparatorMenuTemplate}" />
 		</ResourceDictionary>
-		
+
+		<ResourceDictionary x:Key="ToolBarResources">
+			<DataTemplate x:Key="SeparatorToolBarTemplate">
+				<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+			</DataTemplate>
+
+			<DataTemplate DataType="{x:Type local:UIDelegateCommand}">
+				<Button Command="{Binding}"
+						Content="{Binding DisplayName}"						
+						Style="{DynamicResource ResourceKey={x:Static ToolBar.ButtonStyleKey}}" />
+			</DataTemplate>
+
+			<local:ToolBarItemTemplateSelector x:Key="ToolBarItemTemplateSelector"
+											   SeparatorTemplate="{StaticResource SeparatorToolBarTemplate}" />
+		</ResourceDictionary>
+
 		<DataTemplate x:Key="ClosableTabItemTemplate">
 			<StackPanel Orientation="Horizontal"
 						Margin="0,3,0,0">
@@ -75,7 +90,7 @@
 									<Setter.Value>
 										<ContextMenu ItemsSource="{Binding Commands}"
 													 UsesItemContainerTemplate="True"
-													 ItemContainerTemplateSelector="{DynamicResource MenuTemplateSelector}"
+													 ItemContainerTemplateSelector="{DynamicResource MenuItemTemplateSelector}"
 													 Resources="{StaticResource MenuResources}" />
 									</Setter.Value>
 								</Setter>
@@ -269,26 +284,34 @@
 		<Menu Grid.Column="0"
 			  Grid.ColumnSpan="3"
 			  Grid.Row="0"
-			  Background="{StaticResource ControlBackground}">
+			  Background="Transparent">
 			<MenuItem Header="_File"
 					  ItemsSource="{Binding FileCommands}"
 					  UsesItemContainerTemplate="True"
-					  ItemContainerTemplateSelector="{DynamicResource MenuTemplateSelector}"
+					  ItemContainerTemplateSelector="{DynamicResource MenuItemTemplateSelector}"
 					  Resources="{StaticResource MenuResources}" />
 		</Menu>
 
-		<ToolBar Grid.Column="0"
-				 Grid.ColumnSpan="3"
-				 Grid.Row="1"
-				 ToolBarTray.IsLocked="True"
-				 Background="Transparent">
-			<Button Content="Test" />
-		</ToolBar>
+		<ToolBarTray Grid.Column="0"
+					 Grid.ColumnSpan="3"
+					 Grid.Row="1"
+					 IsLocked="True"
+					 Background="Transparent">
+			<ToolBar Background="Transparent"
+					 ItemsSource="{Binding ToolBarCommands}"
+					 ItemTemplateSelector="{DynamicResource ToolBarItemTemplateSelector}"
+					 Resources="{StaticResource ToolBarResources}" />
+			<!--<ToolBar Background="Transparent"
+					 Visibility="{Binding ActiveItem.HasCommands, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
+					 ItemsSource="{Binding ActiveItem.Commands}"
+					 ItemTemplateSelector="{DynamicResource ToolBarItemTemplateSelector}"
+					 Resources="{StaticResource ToolBarResources}" />-->
+		</ToolBarTray>
 
 		<TreeView Grid.Column="0"
 				  Grid.Row="2"
 				  ItemsSource="{Binding Assemblies}"
-				  local:TreeViewHelper.SelectedItem="{Binding ActiveItem}" />
+				  local:TreeViewHelper.SelectedItem="{Binding ActiveItem, Mode=TwoWay}" />
 
 		<GridSplitter Grid.Column="1"
 					  Grid.Row="2"

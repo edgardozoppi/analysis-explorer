@@ -28,6 +28,11 @@ namespace Explorer
 			this.Category = category;
 		}
 
+		public string DisplayName
+		{
+			get { return this.Name.Replace("_", string.Empty); }
+		}
+
 		public string ShortcutText
 		{
 			get { return this.Shortcut.GetDisplayStringForCulture(CultureInfo.CurrentUICulture); }
