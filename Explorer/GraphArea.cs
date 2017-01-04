@@ -25,6 +25,7 @@ namespace Explorer
 		{
 			this.EdgeCurvingEnabled = true;
 			this.EnableParallelEdges = true;
+			this.ParallelEdgeDistance = 30;
 
 			SetOverlapRemovalAlgorithmType(OverlapRemovalAlgorithmTypeEnum.FSA);
 			SetEdgeRoutingAlgorithmType(EdgeRoutingAlgorithmTypeEnum.SimpleER);
@@ -93,9 +94,10 @@ namespace Explorer
 					layoutAlgorithmParameters = new SimpleTreeLayoutParameters()
 					{
 						Direction = LayoutDirection.LeftToRight,
-						LayerGap = 50,
-						VertexGap = 50,
-						SpanningTreeGeneration = SpanningTreeGeneration.BFS
+						SpanningTreeGeneration = SpanningTreeGeneration.BFS,
+						LayerGap = 30,
+						VertexGap = 30,
+						ComponentGap = 20
 					};
 					break;
 
@@ -103,16 +105,16 @@ namespace Explorer
 					layoutAlgorithmParameters = new EfficientSugiyamaLayoutParameters()
 					{
 						Direction = LayoutDirection.LeftToRight,
-						LayerDistance = 50,
-						VertexDistance = 50,
+						LayerDistance = 30,
+						VertexDistance = 30,
 					};
 					break;
 
 				case LayoutAlgorithmTypeEnum.Sugiyama:
 					layoutAlgorithmParameters = new SugiyamaLayoutParameters()
 					{
-						HorizontalGap = 50,
-						VerticalGap = 50,
+						HorizontalGap = 30,
+						VerticalGap = 30,
 						Simplify = true
 					};
 					break;
