@@ -160,10 +160,10 @@ namespace Explorer
 				var domFrontierAnalysis = new DominanceFrontierAnalysis(cfg);
 				domFrontierAnalysis.Analyze();
 
-				//var text = DGMLSerializer.Serialize(cfg);
+				var text = DGMLSerializer.Serialize(cfg);
 
 				methodInfo.Add("CFG", cfg);
-				//methodInfo.Add("CFG_TEXT", text);
+				methodInfo.Add("CFG_TEXT", text);
 			}
 		}
 
@@ -192,8 +192,8 @@ namespace Explorer
 				var text = method.Body.ToString();
 				methodInfo.Add("WEBS_TEXT", text);
 
-				//text = DGMLSerializer.Serialize(cfg);
-				//methodInfo.Set("CFG_TEXT", text);
+				text = DGMLSerializer.Serialize(cfg);
+				methodInfo.Set("CFG_TEXT", text);
 			}
 		}
 
