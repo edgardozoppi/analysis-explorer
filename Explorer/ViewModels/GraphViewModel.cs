@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Windows;
 using System.ComponentModel;
+using System.Windows.Input;
 
 namespace Explorer
 {
@@ -19,12 +20,15 @@ namespace Explorer
 		public string DGML { get; private set; }
 		public GraphLogic LogicCore { get; private set; }
 
+		public ICommand SaveCommand { get; private set; }
+
 		public GraphDocumentViewModel(MainViewModel main, string kind, string name, string dgml, LayoutAlgorithmTypeEnum layoutType)
 			: base(main)
 		{
 			this.name = name;
 			this.Kind = kind;
 			this.DGML = dgml;
+			this.SaveCommand = new DelegateCommand(OnSave);
 
 			var graph = Extensions.CreateGraphFromDGML(dgml);
 			this.LogicCore = new GraphLogic(graph, layoutType);
@@ -33,6 +37,11 @@ namespace Explorer
 		public override string Name
 		{
 			get { return name; }
+		}
+
+		private void OnSave(object obj)
+		{
+			Extensions.SaveGraph(this.Kind, name, this.DGML);
 		}
 	}
 

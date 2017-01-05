@@ -137,9 +137,22 @@
 						   Margin="5,0,5,5"
 						   VerticalAlignment="Center" />
 
-				<ComboBox ItemsSource="{Binding LayoutAlgorithmTypes, Source={x:Reference GraphArea}}"
-						  SelectedValue="{Binding LayoutAlgorithmType, Source={x:Reference GraphArea}}"
-						  Margin="0,0,0,5" />
+				<DockPanel>
+					<Button DockPanel.Dock="Right"
+							Command="{Binding SaveCommand}"
+							VerticalAlignment="Center"
+							BorderThickness="0"
+							Background="Transparent"
+							Margin="5,0,0,5">
+						<Image Source="Images\save.png"
+							   Width="20"
+							   Height="20" />
+					</Button>
+
+					<ComboBox ItemsSource="{Binding LayoutAlgorithmTypes, Source={x:Reference GraphArea}}"
+							  SelectedValue="{Binding LayoutAlgorithmType, Source={x:Reference GraphArea}}"
+							  Margin="0,0,0,5" />
+				</DockPanel>
 			</local:WrapPanelLastChildFill>
 			
 			<graphx:ZoomControl Background="{StaticResource WorkspaceBackground}"

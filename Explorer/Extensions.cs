@@ -1,7 +1,9 @@
-﻿using Model;
+﻿using Microsoft.Win32;
+using Model;
 using Model.Types;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -142,6 +144,31 @@ namespace Explorer
 			}
 
 			return result;
+		}
+
+		public static void SaveGraph(string kind, string name, string dgml)
+		{
+			var proposedFileName = string.Format("{0} - {1}.dgml", kind, name);
+
+			var dialog = new SaveFileDialog()
+			{
+				FileName = GetSafeFileName(proposedFileName),
+				Filter = "Directed Graph Markup Language files (*.dgml)|*.dgml|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+				InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+			};
+
+			var ok = dialog.ShowDialog();
+
+			if (ok.HasValue && ok.Value)
+			{
+				File.WriteAllText(dialog.FileName, dgml, Encoding.UTF8);
+			}
+		}
+
+		public static string GetSafeFileName(string fileName)
+		{
+			//return Path.GetInvalidFileNameChars().Aggregate(fileName, (current, c) => current.Replace(c.ToString(), string.Empty));
+			return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
 		}
 	}
 }

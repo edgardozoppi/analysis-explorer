@@ -27,14 +27,15 @@ namespace Explorer
 			var main = new MainViewModel();
 			this.DataContext = main;
 
-			//Test(@"C:\Users\Edgar\Projects\AnalysisExplorer\Explorer\Images\method.png");
-			//Test(@"C:\Users\Edgar\Projects\AnalysisExplorer\Explorer\Images\reference.png");
-			//Test(@"C:\Users\Edgar\Projects\AnalysisExplorer\Explorer\Images\field.png");
-			//Test(@"C:\Users\Edgar\Projects\AnalysisExplorer\Explorer\Images\class.png");
-			//Test(@"C:\Users\Edgar\Projects\AnalysisExplorer\Explorer\Images\namespace.png");
-			//Test(@"C:\Users\Edgar\Projects\AnalysisExplorer\Explorer\Images\assembly.png");
-			//Test(@"C:\Users\Edgar\Projects\AnalysisExplorer\Explorer\Images\none.png");
-			//Test(@"C:\Users\Edgar\Projects\AnalysisExplorer\Explorer\Images\close.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\method.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\reference.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\field.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\class.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\namespace.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\assembly.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\none.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\close.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\save.png");
 
 			RegisterCommandShortcuts(main);
 		}
@@ -60,7 +61,7 @@ namespace Explorer
 			}
 		}
 
-		// Borrar referencia a System.Drawing.dll
+		//// Borrar referencia a System.Drawing.dll
 		//private void Test(string fileName)
 		//{
 		//	var myBitmap = new System.Drawing.Bitmap(fileName);

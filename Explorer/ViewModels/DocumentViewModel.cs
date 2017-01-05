@@ -99,42 +99,44 @@ namespace Explorer
 			this.Main.GeneratePTG(method);
 
 			var text = this.Main.GetMethodInfo<string>(method, "IL_TEXT");
-			var vm = new MethodBodyViewModel(this, "IL Bytecode", text);
+			var vm = new MethodBodyViewModel(this, "IL", "IL Bytecode", text);
 			bodies.Add(vm);
 
 			text = this.Main.GetMethodInfo<string>(method, "TAC_TEXT");
-			vm = new MethodBodyViewModel(this, "Three Address Code", text);
+			vm = new MethodBodyViewModel(this, "TAC", "Three Address Code", text);
 			bodies.Add(vm);
 
 			text = this.Main.GetMethodInfo<string>(method, "WEBS_TEXT");
-			vm = new MethodBodyViewModel(this, "Webbed Three Address Code", text);
+			vm = new MethodBodyViewModel(this, "Webs", "Webbed Three Address Code", text);
 			bodies.Add(vm);
 
 			text = this.Main.GetMethodInfo<string>(method, "SSA_TEXT");
-			vm = new MethodBodyViewModel(this, "Static Single Assignment", text);
+			vm = new MethodBodyViewModel(this, "SSA", "Static Single Assignment", text);
 			bodies.Add(vm);
 
 			text = this.Main.GetMethodInfo<string>(method, "CFG_TEXT");
-			vm = new MethodGraphViewModel(this, "Control-Flow Graph", text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
+			vm = new MethodGraphViewModel(this, "CFG", "Control-Flow Graph", text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
 			bodies.Add(vm);
 
 			text = this.Main.GetMethodInfo<string>(method, "PTG_TEXT");
-			vm = new MethodGraphViewModel(this, "Points-To Graph", text, LayoutAlgorithmTypeEnum.LinLog);
+			vm = new MethodGraphViewModel(this, "PTG", "Points-To Graph", text, LayoutAlgorithmTypeEnum.LinLog);
 			bodies.Add(vm);
 		}
 	}
 
 	class MethodBodyViewModel : ViewModelBase
 	{
-		private MethodDocumentViewModel parent;
 		private bool isVisible;
 
+		public MethodDocumentViewModel Parent { get; private set; }
+		public string Kind { get; private set; }
 		public string Name { get; private set; }
 		public string Text { get; private set; }
 
-		public MethodBodyViewModel(MethodDocumentViewModel parent, string name, string text)
+		public MethodBodyViewModel(MethodDocumentViewModel parent, string kind, string name, string text)
 		{
-			this.parent = parent;
+			this.Parent = parent;
+			this.Kind = kind;
 			this.Name = name;
 			this.Text = text;
 			this.isVisible = true;
@@ -146,7 +148,7 @@ namespace Explorer
 			set
 			{
 				SetProperty(ref isVisible, value);
-				parent.OnPropertyChanged(nameof(parent.VisibleBodies));
+				this.Parent.OnPropertyChanged(nameof(this.Parent.VisibleBodies));
 			}
 		}
 	}
@@ -155,11 +157,20 @@ namespace Explorer
 	{
 		public GraphLogic LogicCore { get; private set; }
 
-		public MethodGraphViewModel(MethodDocumentViewModel parent, string name, string text, LayoutAlgorithmTypeEnum layoutType)
-			: base(parent, name, text)
+		public ICommand SaveCommand { get; private set; }
+
+		public MethodGraphViewModel(MethodDocumentViewModel parent, string kind, string name, string text, LayoutAlgorithmTypeEnum layoutType)
+			: base(parent, kind, name, text)
 		{
+			this.SaveCommand = new DelegateCommand(OnSave);
+
 			var graph = Extensions.CreateGraphFromDGML(text);
 			this.LogicCore = new GraphLogic(graph, layoutType);
+		}
+
+		private void OnSave(object obj)
+		{
+			Extensions.SaveGraph(this.Kind, this.Parent.Name, this.Text);
 		}
 	}
 }
