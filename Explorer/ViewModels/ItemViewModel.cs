@@ -77,13 +77,11 @@ namespace Explorer
 	class AssemblyViewModel : ItemViewModelBase
 	{
 		private Assembly assembly;
-		private IDictionary<string, object> info;
 
 		public AssemblyViewModel(MainViewModel main, Assembly assembly)
 			: base(main)
 		{
 			this.assembly = assembly;
-			this.info = new Dictionary<string, object>();
 
 			var references = new ItemViewModel(main, "References", "reference");
 			this.Childs.Add(references);
@@ -122,62 +120,20 @@ namespace Explorer
 
 		private void OnShowCH(object obj)
 		{
-			GenerateCH();
+			this.Main.GenerateCH();
 
-			var text = GetInfo<string>("CH_TEXT");
+			var text = this.Main.GetProgramInfo<string>("CH_TEXT");
 			var document = new GraphDocumentViewModel(this.Main, "CH", assembly.Name, text, LayoutAlgorithmTypeEnum.LinLog);
 			this.Main.AddDocument(document);
 		}
 
 		private void OnShowCG(object obj)
 		{
-			GenerateCG();
+			this.Main.GenerateCG();
 
-			var text = GetInfo<string>("CG_TEXT");
+			var text = this.Main.GetProgramInfo<string>("CG_TEXT");
 			var document = new GraphDocumentViewModel(this.Main, "CG", assembly.Name, text, LayoutAlgorithmTypeEnum.LinLog);
 			this.Main.AddDocument(document);
-		}
-
-		private void GenerateCH()
-		{
-			if (!info.ContainsKey("CH_TEXT"))
-			{
-				var ch = new ClassHierarchy();
-				ch.Analyze(assembly);
-
-				var text = DGMLSerializer.Serialize(ch);
-
-				info.Add("CH", ch);
-				info.Add("CH_TEXT", text);
-			}
-		}
-
-		private void GenerateCG()
-		{
-			GenerateCH();
-
-			if (!info.ContainsKey("CG_TEXT"))
-			{
-				var ch = GetInfo<ClassHierarchy>("CH");
-				var cga = new ClassHierarchyAnalysis(ch);
-
-				cga.OnReachableMethodFound = method =>
-				{
-					//this.Main.GenerateIL(method);
-					this.Main.GenerateTAC(method);
-				};
-
-				var roots = assembly.GetRootMethods();
-				var cg = cga.Analyze(this.Main.Host, roots);
-				var text = DGMLSerializer.Serialize(cg);
-
-				info.Add("CG_TEXT", text);
-			}
-		}
-
-		private T GetInfo<T>(string key)
-		{
-			return (T)info[key];
 		}
 	}
 
