@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Xml.Linq;
 
 namespace Explorer
@@ -25,6 +26,8 @@ namespace Explorer
 		public string DGML { get; private set; }
 		public Graph Graph { get; private set; }
 
+		public ICommand SaveCommand { get; private set; }
+
 		public GraphDocumentViewModel(MainViewModel main, string kind, string name, string dgml, string layoutType)
 			: base(main)
 		{
@@ -32,6 +35,7 @@ namespace Explorer
 			this.name = name;
 			this.DGML = dgml;
 			this.layoutType = layoutType;
+			this.SaveCommand = new DelegateCommand(OnSave);
 
 			this.Graph = Extensions.CreateGraphFromDGML(dgml);
 		}
@@ -45,6 +49,11 @@ namespace Explorer
 		public override string Name
 		{
 			get { return name; }
+		}
+
+		private void OnSave(object obj)
+		{
+			Extensions.SaveGraph(this.Kind, name, this.DGML);
 		}
 	}
 
@@ -74,15 +83,4 @@ namespace Explorer
 			this.BackgroundColor = "White";
 		}
 	}
-
-	//class GraphViewModel<V, E> : ViewModelBase
-	//	where E : IEdge<V>
-	//{
-	//	public IGraph<V, E> Graph { get; private set; }
-
-	//	public GraphViewModel(IGraph<V, E> graph)
-	//	{
-	//		this.Graph = graph;
-	//	}
-	//}
 }
