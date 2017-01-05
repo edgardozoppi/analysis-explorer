@@ -20,7 +20,7 @@ namespace Explorer
 	{
 		private Host host;
 		private ILoader loader;
-		private ProgramAnalysisInfo programAnalysisInfo;
+		private ProgramAnalysisInfo programInfo;
 
 		private ItemViewModelBase activeItem;
 		private DocumentViewModelBase activeDocument;
@@ -41,7 +41,7 @@ namespace Explorer
 
 			host = new Host();
 			loader = new CCIProvider.Loader(host);
-			programAnalysisInfo = new ProgramAnalysisInfo();
+			programInfo = new ProgramAnalysisInfo();
 
 			PlatformTypes.Resolve(host);
 		}
@@ -102,15 +102,57 @@ namespace Explorer
 			this.ActiveDocument = document;
 		}
 
+		public T GetProgramInfo<T>(string key)
+		{
+			return programInfo.Get<T>(key);
+		}
+
 		public T GetMethodInfo<T>(MethodDefinition method, string key)
 		{
-			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+			var methodInfo = programInfo.GetOrAdd(method);
 			return methodInfo.Get<T>(key);
+		}
+
+		public void GenerateCH()
+		{
+			if (!programInfo.Contains("CH_TEXT"))
+			{
+				var ch = new ClassHierarchy();
+				ch.Analyze(host);
+
+				var text = DGMLSerializer.Serialize(ch);
+
+				programInfo.Add("CH", ch);
+				programInfo.Add("CH_TEXT", text);
+			}
+		}
+
+		public void GenerateCG()
+		{
+			GenerateCH();
+
+			if (!programInfo.Contains("CG_TEXT"))
+			{
+				var ch = programInfo.Get<ClassHierarchy>("CH");
+				var cga = new ClassHierarchyAnalysis(ch);
+
+				cga.OnReachableMethodFound = method =>
+				{
+					//GenerateIL(method);
+					GenerateTAC(method);
+				};
+
+				var roots = host.GetRootMethods();
+				var cg = cga.Analyze(host, roots);
+				var text = DGMLSerializer.Serialize(cg);
+
+				programInfo.Add("CG_TEXT", text);
+			}
 		}
 
 		public void GenerateIL(MethodDefinition method)
 		{
-			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+			var methodInfo = programInfo.GetOrAdd(method);
 
 			if (!methodInfo.Contains("IL_TEXT"))
 			{
@@ -122,7 +164,7 @@ namespace Explorer
 
 		public void GenerateTAC(MethodDefinition method)
 		{
-			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+			var methodInfo = programInfo.GetOrAdd(method);
 
 			GenerateIL(method);
 
@@ -138,7 +180,7 @@ namespace Explorer
 
 		public void GenerateCFG(MethodDefinition method)
 		{
-			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+			var methodInfo = programInfo.GetOrAdd(method);
 
 			//GenerateIL(method);
 			GenerateTAC(method);
@@ -169,7 +211,7 @@ namespace Explorer
 
 		public void GenerateWebs(MethodDefinition method)
 		{
-			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+			var methodInfo = programInfo.GetOrAdd(method);
 
 			//GenerateIL(method);
 			//GenerateTAC(method);
@@ -199,7 +241,7 @@ namespace Explorer
 
 		public void GenerateSSA(MethodDefinition method)
 		{
-			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+			var methodInfo = programInfo.GetOrAdd(method);
 
 			//GenerateIL(method);
 			//GenerateTAC(method);
@@ -231,7 +273,7 @@ namespace Explorer
 
 		public void GeneratePTG(MethodDefinition method)
 		{
-			var methodInfo = programAnalysisInfo.GetOrAdd(method);
+			var methodInfo = programInfo.GetOrAdd(method);
 
 			//GenerateIL(method);
 			//GenerateTAC(method);
