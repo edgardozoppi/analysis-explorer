@@ -254,12 +254,12 @@ namespace Explorer
 
 				// Live Variables
 				var liveVariables = new LiveVariablesAnalysis(cfg);
-				liveVariables.Analyze();
+				var livenessInfo = liveVariables.Analyze();
 
 				// SSA
 				var ssa = new StaticSingleAssignment(method.Body, cfg);
 				ssa.Transform();
-				ssa.Prune(liveVariables);
+				ssa.Prune(livenessInfo);
 
 				method.Body.UpdateVariables();
 
