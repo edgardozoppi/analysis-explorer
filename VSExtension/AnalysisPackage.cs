@@ -40,17 +40,19 @@ namespace VSExtension
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
-    public sealed class CommandsPackage : Package
+    public sealed class AnalysisPackage : Package
     {
         /// <summary>
         /// Command1Package GUID string.
         /// </summary>
         public const string PackageGuidString = "b179a9e7-10b8-4044-9a37-11310fb2441c";
 
+        public const string Name = "Analysis.NET";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Commands"/> class.
         /// </summary>
-        public CommandsPackage()
+        public AnalysisPackage()
         {
             // Inside this method you can place any initialization code that does not require
             // any Visual Studio service because at this point the package object is created but
