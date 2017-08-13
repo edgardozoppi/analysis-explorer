@@ -2,6 +2,7 @@
 using Model.Types;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -131,7 +132,19 @@ namespace VSExtension
 			return result;
 		}
 
-		public static IBasicType GetTypeReference(object type)
+        public static object GetParent(EnvDTE.CodeFunction function)
+        {
+            var result = function.Parent;
+
+            if (result is EnvDTE.CodeProperty property)
+            {
+                result = property.Parent;
+            }
+
+            return result;
+        }
+
+        public static IBasicType GetTypeReference(object type)
 		{
 			BasicType result = null;
 
@@ -167,7 +180,7 @@ namespace VSExtension
 				modifier = "static ";
 			}
 
-			return string.Format("{0}{1}({2})", modifier, method.Name, parameters);
+			return $"{modifier}{method.Name}({parameters})";
 		}
 
 		private static object GetParameters(IEnumerable<IMethodParameterReference> parameters)
@@ -177,7 +190,7 @@ namespace VSExtension
 			foreach (var parameter in parameters)
 			{
 				var type = parameter.Type.GetFullName();
-				result.AppendFormat(", {0}", type);
+				result.Append($", {type}");
 			}
 
 			if (result.Length > 0)
@@ -198,7 +211,17 @@ namespace VSExtension
 				modifier = "static ";
 			}
 
-			return string.Format("{0}{1}({2})", modifier, method.Name, parameters);
+            if (method.FunctionKind == EnvDTE.vsCMFunction.vsCMFunctionPropertyGet)
+            {
+                modifier = $"{modifier}get_";
+            }
+            else if (method.FunctionKind == EnvDTE.vsCMFunction.vsCMFunctionPropertySet)
+            {
+                modifier = $"{modifier}set_";
+                parameters = method.Type.AsFullName;
+            }
+
+            return $"{modifier}{method.Name}({parameters})";
 		}
 
 		private static object GetParameters(EnvDTE.CodeElements parameters)
@@ -207,7 +230,7 @@ namespace VSExtension
 
 			foreach (EnvDTE.CodeParameter parameter in parameters)
 			{
-				result.AppendFormat(", {0}", parameter.Type.AsFullName);
+				result.Append($", {parameter.Type.AsFullName}");
 			}
 
 			if (result.Length > 0)
@@ -217,5 +240,41 @@ namespace VSExtension
 
 			return result.ToString();
 		}
-	}
+
+        public static string ToFullDisplayName(this IMethodReference method)
+        {
+            var result = new StringBuilder();
+
+            result.AppendFormat("{0}.{1}", method.ContainingType.GetFullName(), method.GenericName);
+
+            var parameters = string.Join(", ", method.Parameters.Select(p => p.ToParameterString()));
+            result.AppendFormat("({0})", parameters);
+
+            return result.ToString();
+        }
+
+        private static string ToParameterString(this IMethodParameterReference parameter)
+        {
+            var kind = string.Empty;
+
+            switch (parameter.Kind)
+            {
+                case MethodParameterKind.Out:
+                    kind = "out ";
+                    break;
+
+                case MethodParameterKind.Ref:
+                    kind = "ref ";
+                    break;
+            }
+
+            return string.Format("{0}{1}", kind, parameter.Type);
+        }
+
+        public static string GetSafeFileName(string fileName)
+        {
+            //return Path.GetInvalidFileNameChars().Aggregate(fileName, (current, c) => current.Replace(c.ToString(), string.Empty));
+            return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+        }
+    }
 }
