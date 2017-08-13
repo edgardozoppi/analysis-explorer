@@ -61,31 +61,36 @@ namespace VSExtension
             if (commandService != null)
             {
                 var menuCommandId = new CommandID(CommandSet, CommandId_ShowIL);
-                var menuItem = new MenuCommand((s, e) => OnCommand(ShowIL), menuCommandId);
-                commandService.AddCommand(menuItem);
+				var menuItem = new OleMenuCommand((s, e) => OnCommand(ShowIL), menuCommandId);
+				menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+				commandService.AddCommand(menuItem);
 
                 menuCommandId = new CommandID(CommandSet, CommandId_ShowTAC);
-                menuItem = new MenuCommand((s, e) => OnCommand(ShowTAC), menuCommandId);
-                commandService.AddCommand(menuItem);
+                menuItem = new OleMenuCommand((s, e) => OnCommand(ShowTAC), menuCommandId);
+				menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+				commandService.AddCommand(menuItem);
 
                 menuCommandId = new CommandID(CommandSet, CommandId_ShowWebs);
-                menuItem = new MenuCommand((s, e) => OnCommand(ShowWebs), menuCommandId);
-                commandService.AddCommand(menuItem);
+                menuItem = new OleMenuCommand((s, e) => OnCommand(ShowWebs), menuCommandId);
+				menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+				commandService.AddCommand(menuItem);
 
 				menuCommandId = new CommandID(CommandSet, CommandId_ShowSSA);
-				menuItem = new MenuCommand((s, e) => OnCommand(ShowSSA), menuCommandId);
+				menuItem = new OleMenuCommand((s, e) => OnCommand(ShowSSA), menuCommandId);
+				menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
 				commandService.AddCommand(menuItem);
 
 				menuCommandId = new CommandID(CommandSet, CommandId_ShowCFG);
-				menuItem = new MenuCommand((s, e) => OnCommand(ShowCFG), menuCommandId);
+				menuItem = new OleMenuCommand((s, e) => OnCommand(ShowCFG), menuCommandId);
+				menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
 				commandService.AddCommand(menuItem);
 			}
         }
 
-        /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private IServiceProvider ServiceProvider
+		/// <summary>
+		/// Gets the service provider from the owner package.
+		/// </summary>
+		private IServiceProvider ServiceProvider
         {
             get { return _package; }
         }
@@ -115,7 +120,23 @@ namespace VSExtension
             }
         }
 
-        private void OnCommand(Action action)
+		private void OnBeforeQueryStatus(object sender, EventArgs e)
+		{
+			if (sender is OleMenuCommand command)
+			{
+				var visible = false;
+				var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
+
+				if (dte.SelectedItems.SelectionContainer.Count > 0)
+				{
+					visible = true;
+				}
+
+				command.Visible = visible;
+			}
+		}
+
+		private void OnCommand(Action action)
         {
             _action = () =>
             {
@@ -134,16 +155,20 @@ namespace VSExtension
 
         private object[] GetSelectedItems()
         {
+			object[] result = null;
             var monitor = Package.GetGlobalService(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
             monitor.GetCurrentSelection(out IntPtr hierarchyPtr, out uint projectItemId, out IVsMultiItemSelect multiItemPtr, out IntPtr containerPtr);
 
             var container = System.Runtime.InteropServices.Marshal.GetObjectForIUnknown(containerPtr) as ISelectionContainer;
             container.CountObjects((uint)Microsoft.VisualStudio.Shell.Interop.Constants.GETOBJS_SELECTED, out uint count);
 
-            var selectedItems = new object[count];
-            container.GetObjects((uint)Microsoft.VisualStudio.Shell.Interop.Constants.GETOBJS_SELECTED, count, selectedItems);
+			if (count > 0)
+			{
+				result = new object[count];
+				container.GetObjects((uint)Microsoft.VisualStudio.Shell.Interop.Constants.GETOBJS_SELECTED, count, result);
+			}
 
-            return selectedItems;
+            return result;
         }
 
 		private string GetOutputFileName(Project project)
@@ -156,7 +181,7 @@ namespace VSExtension
 			return result;
 		}
 
-		private void ShowFile(Func<AnalysisHelper, Model.Types.IMethodReference, string> generate, string kind, string extension)
+		private void ShowFile(Func<AnalysisHelper, Model.Types.MethodDefinition, string> generate, string kind, string extension)
 		{
 			var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
 			var selectedItems = GetSelectedItems();
@@ -179,31 +204,48 @@ namespace VSExtension
 							var assemblyFileName = GetOutputFileName(project);
 							helper.LoadAssembly(assemblyFileName);
 
-							var containingType = Utils.GetTypeReference(function.Parent);
+                            var containingType = Utils.GetTypeReference(function.Parent);
 							var signature = Utils.GetSignature(function);
 							var reference = helper.FindMethod(containingType, signature);
-							var text = generate(helper, reference);
+                            var method = helper.Resolve(reference);
 
-							var fileName = string.Format("{0} - {1}.{2}", kind, function.FullName, extension);
-							fileName = Path.Combine(Path.GetTempPath(), fileName);
+                            if (method.HasBody)
+                            {
+                                var text = generate(helper, method);
 
-							File.WriteAllText(fileName, text);
-							dte.ItemOperations.OpenFile(fileName);
+                                var fileName = string.Format("{0} - {1}.{2}", kind, function.FullName, extension);
+                                fileName = Path.Combine(Path.GetTempPath(), fileName);
+
+                                File.WriteAllText(fileName, text);
+                                dte.ItemOperations.OpenFile(fileName);
+                            }
+                            else
+                            {
+                                VsShellUtilities.ShowMessageBox
+                                (
+                                    this.ServiceProvider,
+                                    "The selected member doesn't have a body implementation",
+                                    AnalysisPackage.Name,
+                                    OLEMSGICON.OLEMSGICON_INFO,
+                                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
+                                );
+                            }
 						}
 					}
 				}
 			}
 		}
 
-		private void ShowIL() => ShowFile((helper, reference) => helper.GenerateIL(reference), "IL", "txt");
+		private void ShowIL() => ShowFile((helper, method) => helper.GenerateIL(method), "IL", "txt");
 
-		private void ShowTAC() => ShowFile((helper, reference) => helper.GenerateTAC(reference), "TAC", "txt");
+		private void ShowTAC() => ShowFile((helper, method) => helper.GenerateTAC(method), "TAC", "txt");
 
-		private void ShowCFG() => ShowFile((helper, reference) => helper.GenerateCFG(reference), "CFG", "dgml");
+		private void ShowCFG() => ShowFile((helper, method) => helper.GenerateCFG(method), "CFG", "dgml");
 
-		private void ShowWebs() => ShowFile((helper, reference) => helper.GenerateWebs(reference), "Webs", "txt");
+		private void ShowWebs() => ShowFile((helper, method) => helper.GenerateWebs(method), "Webs", "txt");
 
-		private void ShowSSA() => ShowFile((helper, reference) => helper.GenerateSSA(reference), "SSA", "txt");
+		private void ShowSSA() => ShowFile((helper, method) => helper.GenerateSSA(method), "SSA", "txt");
 
     }
 }

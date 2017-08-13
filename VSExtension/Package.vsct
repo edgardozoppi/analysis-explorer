@@ -65,6 +65,7 @@
 
 			<Button guid="guidPackageCmdSet" id="CommandId_ShowIL" priority="0x0100" type="Button">
 				<Parent guid="guidPackageCmdSet" id="MainMemberMenuGroup" />
+                <CommandFlag>DefaultInvisible</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>Show IL</ButtonText>
@@ -72,6 +73,7 @@
 			</Button>
 			<Button guid="guidPackageCmdSet" id="CommandId_ShowTAC" priority="0x0200" type="Button">
 				<Parent guid="guidPackageCmdSet" id="MainMemberMenuGroup" />
+                <CommandFlag>DefaultInvisible</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>Show TAC</ButtonText>
@@ -79,6 +81,7 @@
 			</Button>
 			<Button guid="guidPackageCmdSet" id="CommandId_ShowWebs" priority="0x0300" type="Button">
 				<Parent guid="guidPackageCmdSet" id="MainMemberMenuGroup" />
+                <CommandFlag>DefaultInvisible</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>Show Webs</ButtonText>
@@ -86,6 +89,7 @@
 			</Button>
 			<Button guid="guidPackageCmdSet" id="CommandId_ShowSSA" priority="0x0400" type="Button">
 				<Parent guid="guidPackageCmdSet" id="MainMemberMenuGroup" />
+                <CommandFlag>DefaultInvisible</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>Show SSA</ButtonText>
@@ -93,6 +97,7 @@
 			</Button>
 			<Button guid="guidPackageCmdSet" id="CommandId_ShowCFG" priority="0x0500" type="Button">
 				<Parent guid="guidPackageCmdSet" id="MainMemberMenuGroup" />
+                <CommandFlag>DefaultInvisible</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>Show CFG</ButtonText>

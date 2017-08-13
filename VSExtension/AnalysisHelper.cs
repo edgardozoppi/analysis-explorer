@@ -61,45 +61,45 @@ namespace VSExtension
 			return result;
 		}
 
-		public string GenerateIL(IMethodReference methodref)
+        public MethodDefinition Resolve(IMethodReference method)
+        {
+            var result = _host.ResolveReference(method) as MethodDefinition;
+            return result;
+        }
+
+		public string GenerateIL(MethodDefinition method)
 		{
-			var method = _host.ResolveReference(methodref) as MethodDefinition;
 			var result = method.Body.ToString();
 			return result;
 		}
 
-		public string GenerateTAC(IMethodReference methodref)
+		public string GenerateTAC(MethodDefinition method)
 		{
-			var method = _host.ResolveReference(methodref) as MethodDefinition;
 			var body = GetTAC(method);
 			var result = body.ToString();
 			return result;
 		}
 
-		public string GenerateCFG(IMethodReference methodref)
+		public string GenerateCFG(MethodDefinition method)
 		{
-			var method = _host.ResolveReference(methodref) as MethodDefinition;
 			var cfg = GetCFG(method, out MethodBody body);
 			var result = DGMLSerializer.Serialize(cfg);
 			return result;
 		}
 
-		internal string GenerateWebs(IMethodReference methodref)
+		public string GenerateWebs(MethodDefinition method)
 		{
-			var method = _host.ResolveReference(methodref) as MethodDefinition;
 			GetWebs(method, out MethodBody body);
 			var result = body.ToString();
 			return result;
 		}
 
-		internal string GenerateSSA(IMethodReference methodref)
+		public string GenerateSSA(MethodDefinition method)
 		{
-			var method = _host.ResolveReference(methodref) as MethodDefinition;
 			GetSSA(method, out MethodBody body);
 			var result = body.ToString();
 			return result;
 		}
-
 
 		private MethodBody GetTAC(MethodDefinition method)
 		{
