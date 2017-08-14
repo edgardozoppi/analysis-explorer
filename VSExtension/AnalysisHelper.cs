@@ -41,6 +41,12 @@ namespace VSExtension
 			_loader.LoadAssembly(fileName);
 		}
 
+        public IAssemblyReference FindAssembly(string assemblyName)
+        {
+            var result = _host.Assemblies.SingleOrDefault(asm => asm.Name == assemblyName);
+            return result;
+        }
+
 		public IMethodReference FindMethod(IBasicType containingType, string methodSignature)
 		{
 			IMethodReference result = null;
@@ -60,6 +66,12 @@ namespace VSExtension
 
 			return result;
 		}
+
+        public Assembly Resolve(IAssemblyReference assembly)
+        {
+            var result = _host.ResolveReference(assembly) as Assembly;
+            return result;
+        }
 
         public MethodDefinition Resolve(IMethodReference method)
         {
@@ -105,6 +117,20 @@ namespace VSExtension
         {
             var ptg = GetPTG(method);
             var result = DGMLSerializer.Serialize(ptg);
+            return result;
+        }
+
+        public string GenerateCH(Assembly assembly)
+        {
+            var ch = GetCH(assembly);
+            var result = DGMLSerializer.Serialize(ch);
+            return result;
+        }
+
+        public string GenerateCG(Assembly assembly)
+        {
+            var cg = GetCG(assembly);
+            var result = DGMLSerializer.Serialize(cg);
             return result;
         }
 
@@ -184,6 +210,28 @@ namespace VSExtension
             //ptg.RemoveTemporalVariables();
 
             return ptg;
+        }
+
+        private ClassHierarchy GetCH(Assembly assembly)
+        {
+            var ch = new ClassHierarchy();
+            ch.Analyze(_host);
+            return ch;
+        }
+
+        private CallGraph GetCG(Assembly assembly)
+        {
+            var ch = GetCH(assembly);
+            var cga = new ClassHierarchyAnalysis(ch);
+
+            cga.OnReachableMethodFound = method =>
+            {
+                method.Body = GetTAC(method);
+            };
+
+            var roots = _host.GetRootMethods();
+            var cg = cga.Analyze(_host, roots);
+            return cg;
         }
     }
 }

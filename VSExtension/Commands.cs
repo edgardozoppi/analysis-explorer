@@ -20,12 +20,14 @@ namespace VSExtension
     /// </summary>
     internal sealed class Commands
     {
-        public const int CommandId_ShowIL = 0x0101;
-        public const int CommandId_ShowTAC = 0x0102;
-        public const int CommandId_ShowWebs = 0x0103;
-        public const int CommandId_ShowSSA = 0x0104;
-        public const int CommandId_ShowCFG = 0x0105;
-        public const int CommandId_ShowPTG = 0x0106;
+        public const int CommandId_ShowIL = 0x0102;
+        public const int CommandId_ShowTAC = 0x0103;
+        public const int CommandId_ShowWebs = 0x0104;
+        public const int CommandId_ShowSSA = 0x0105;
+        public const int CommandId_ShowCFG = 0x0106;
+        public const int CommandId_ShowPTG = 0x0107;
+        public const int CommandId_ShowCH = 0x0108;
+        public const int CommandId_ShowCG = 0x0109;
 
         /// <summary>
         /// Command menu group (command set GUID).
@@ -63,32 +65,40 @@ namespace VSExtension
             {
                 var menuCommandId = new CommandID(CommandSet, CommandId_ShowIL);
                 var menuItem = new OleMenuCommand((s, e) => OnCommand(ShowIL), menuCommandId);
-                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                menuItem.BeforeQueryStatus += OnBeforeMemberMenuQueryStatus;
                 commandService.AddCommand(menuItem);
 
                 menuCommandId = new CommandID(CommandSet, CommandId_ShowTAC);
                 menuItem = new OleMenuCommand((s, e) => OnCommand(ShowTAC), menuCommandId);
-                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                menuItem.BeforeQueryStatus += OnBeforeMemberMenuQueryStatus;
                 commandService.AddCommand(menuItem);
 
                 menuCommandId = new CommandID(CommandSet, CommandId_ShowWebs);
                 menuItem = new OleMenuCommand((s, e) => OnCommand(ShowWebs), menuCommandId);
-                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                menuItem.BeforeQueryStatus += OnBeforeMemberMenuQueryStatus;
                 commandService.AddCommand(menuItem);
 
                 menuCommandId = new CommandID(CommandSet, CommandId_ShowSSA);
                 menuItem = new OleMenuCommand((s, e) => OnCommand(ShowSSA), menuCommandId);
-                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                menuItem.BeforeQueryStatus += OnBeforeMemberMenuQueryStatus;
                 commandService.AddCommand(menuItem);
 
                 menuCommandId = new CommandID(CommandSet, CommandId_ShowCFG);
                 menuItem = new OleMenuCommand((s, e) => OnCommand(ShowCFG), menuCommandId);
-                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                menuItem.BeforeQueryStatus += OnBeforeMemberMenuQueryStatus;
                 commandService.AddCommand(menuItem);
 
                 menuCommandId = new CommandID(CommandSet, CommandId_ShowPTG);
                 menuItem = new OleMenuCommand((s, e) => OnCommand(ShowPTG), menuCommandId);
-                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                menuItem.BeforeQueryStatus += OnBeforeMemberMenuQueryStatus;
+                commandService.AddCommand(menuItem);
+
+                menuCommandId = new CommandID(CommandSet, CommandId_ShowCH);
+                menuItem = new OleMenuCommand((s, e) => OnCommand(ShowCH), menuCommandId);
+                commandService.AddCommand(menuItem);
+
+                menuCommandId = new CommandID(CommandSet, CommandId_ShowCG);
+                menuItem = new OleMenuCommand((s, e) => OnCommand(ShowCG), menuCommandId);
                 commandService.AddCommand(menuItem);
             }
         }
@@ -124,13 +134,13 @@ namespace VSExtension
             _projectBuildResult[info] = success;
         }
 
-        private void OnBeforeQueryStatus(object sender, EventArgs e)
+        private void OnBeforeMemberMenuQueryStatus(object sender, EventArgs e)
         {
             if (sender is OleMenuCommand command)
             {
-                var visible = false;
                 var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
                 var selectionContainer = dte.SelectedItems.SelectionContainer;
+                var visible = false;
 
                 if (selectionContainer != null &&
                     selectionContainer.Count > 0)
@@ -200,9 +210,8 @@ namespace VSExtension
             return result;
         }
 
-        private void ShowFile(Func<AnalysisHelper, Model.Types.MethodDefinition, string> generate, string kind, string extension)
+        private void ShowMemberFile(Func<AnalysisHelper, Model.Types.MethodDefinition, string> generate, string kind, string extension)
         {
-            var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
             var selectedItems = GetSelectedItems();
 
             using (var helper = new AnalysisHelper())
@@ -215,25 +224,25 @@ namespace VSExtension
                     }
                     else if (item is CodeFunction function)
                     {
-                        ShowFile(helper, function, generate, kind, extension);
+                        ShowMemberFile(helper, function, generate, kind, extension);
                     }
                     else if (item is CodeProperty property)
                     {
                         if (property.Getter != null)
                         {
-                            ShowFile(helper, property.Getter, generate, kind, extension);
+                            ShowMemberFile(helper, property.Getter, generate, kind, extension);
                         }
 
                         if (property.Setter != null)
                         {
-                            ShowFile(helper, property.Setter, generate, kind, extension);
+                            ShowMemberFile(helper, property.Setter, generate, kind, extension);
                         }
                     }
                 }
             }
         }
 
-        private void ShowFile(AnalysisHelper helper, CodeFunction function, Func<AnalysisHelper, Model.Types.MethodDefinition, string> generate, string kind, string extension)
+        private void ShowMemberFile(AnalysisHelper helper, CodeFunction function, Func<AnalysisHelper, Model.Types.MethodDefinition, string> generate, string kind, string extension)
         {
             var project = function.ProjectItem.ContainingProject;
             var info = GetActiveConfigurationInfo(project);
@@ -279,16 +288,55 @@ namespace VSExtension
             }
         }
 
-        private void ShowIL() => ShowFile((helper, method) => helper.GenerateIL(method), "IL", "txt");
+        private void ShowProjectFile(Func<AnalysisHelper, Model.Assembly, string> generate, string kind, string extension)
+        {
+            var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
+            var selectedItems = dte.SelectedItems;
 
-        private void ShowTAC() => ShowFile((helper, method) => helper.GenerateTAC(method), "TAC", "txt");
+            using (var helper = new AnalysisHelper())
+            {
+                foreach (SelectedItem item in selectedItems)
+                {
+                    var project = item.Project;
+                    var info = GetActiveConfigurationInfo(project);
+                    var ok = _projectBuildResult.TryGetValue(info, out bool succeeded);
 
-        private void ShowWebs() => ShowFile((helper, method) => helper.GenerateWebs(method), "Webs", "txt");
+                    if (ok && succeeded)
+                    {
+                        var assemblyFileName = GetOutputFileName(project);
+                        helper.LoadAssembly(assemblyFileName);
+                        var reference = helper.FindAssembly(item.Name);
+                        var assembly = helper.Resolve(reference);
 
-        private void ShowSSA() => ShowFile((helper, method) => helper.GenerateSSA(method), "SSA", "txt");
+                        var text = generate(helper, assembly);
 
-        private void ShowCFG() => ShowFile((helper, method) => helper.GenerateCFG(method), "CFG", "dgml");
+                        var fileName = assembly.Name;
+                        fileName = $"{kind} - {fileName}.{extension}";
+                        fileName = Utils.GetSafeFileName(fileName);
+                        fileName = Path.Combine(Path.GetTempPath(), fileName);
 
-        private void ShowPTG() => ShowFile((helper, method) => helper.GeneratePTG(method), "PTG", "dgml");
+                        File.WriteAllText(fileName, text);
+
+                        dte.ItemOperations.OpenFile(fileName);
+                    }
+                }
+            }
+        }
+
+        private void ShowIL() => ShowMemberFile((helper, method) => helper.GenerateIL(method), "IL", "txt");
+
+        private void ShowTAC() => ShowMemberFile((helper, method) => helper.GenerateTAC(method), "TAC", "txt");
+
+        private void ShowWebs() => ShowMemberFile((helper, method) => helper.GenerateWebs(method), "Webs", "txt");
+
+        private void ShowSSA() => ShowMemberFile((helper, method) => helper.GenerateSSA(method), "SSA", "txt");
+
+        private void ShowCFG() => ShowMemberFile((helper, method) => helper.GenerateCFG(method), "CFG", "dgml");
+
+        private void ShowPTG() => ShowMemberFile((helper, method) => helper.GeneratePTG(method), "PTG", "dgml");
+
+        private void ShowCH() => ShowProjectFile((helper, assembly) => helper.GenerateCH(assembly), "CH", "dgml");
+
+        private void ShowCG() => ShowProjectFile((helper, assembly) => helper.GenerateCG(assembly), "CG", "dgml");
     }
 }
