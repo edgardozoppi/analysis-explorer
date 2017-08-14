@@ -157,7 +157,16 @@ namespace VSExtension
 					ContainingType = GetTypeReference(parentClass.Parent)
 				};
 			}
-			else if (type is EnvDTE.CodeStruct parentStruct)
+            else if (type is EnvDTE.CodeInterface parentInterface)
+            {
+                result = new BasicType(parentInterface.Name, TypeKind.ReferenceType)
+                {
+                    ContainingAssembly = GetAssemblyReference(parentInterface.ProjectItem),
+                    ContainingNamespace = parentInterface.Namespace.FullName,
+                    ContainingType = GetTypeReference(parentInterface.Parent)
+                };
+            }
+            else if (type is EnvDTE.CodeStruct parentStruct)
 			{
 				result = new BasicType(parentStruct.Name, TypeKind.ValueType)
 				{

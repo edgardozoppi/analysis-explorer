@@ -37,9 +37,12 @@
          must be a menu. -->
 		<Groups>
 			<Group guid="guidPackageCmdSet" id="MemberMenuGroup" priority="0x0400" />
-			<Group guid="guidPackageCmdSet" id="MainMemberMenuGroup" priority="0x0601">
+			<Group guid="guidPackageCmdSet" id="MainMemberMenuGroup" priority="0x0100">
 				<Parent guid="guidPackageCmdSet" id="MainMemberMenu"/>
 			</Group>
+            <Group guid="guidPackageCmdSet" id="GraphMemberMenuGroup" priority="0x0200">
+                <Parent guid="guidPackageCmdSet" id="MainMemberMenu"/>
+            </Group>
 		</Groups>
 
 		<Menus>
@@ -96,13 +99,21 @@
 				</Strings>
 			</Button>
 			<Button guid="guidPackageCmdSet" id="CommandId_ShowCFG" priority="0x0500" type="Button">
-				<Parent guid="guidPackageCmdSet" id="MainMemberMenuGroup" />
+				<Parent guid="guidPackageCmdSet" id="GraphMemberMenuGroup" />
                 <CommandFlag>DefaultInvisible</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>Show CFG</ButtonText>
 				</Strings>
 			</Button>
+            <Button guid="guidPackageCmdSet" id="CommandId_ShowPTG" priority="0x0600" type="Button">
+                <Parent guid="guidPackageCmdSet" id="GraphMemberMenuGroup" />
+                <CommandFlag>DefaultInvisible</CommandFlag>
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <Strings>
+                    <ButtonText>Show PTG</ButtonText>
+                </Strings>
+            </Button>
 		</Buttons>
 
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -148,13 +159,15 @@
 		<GuidSymbol name="guidPackageCmdSet" value="{72b3b0c6-ab01-4963-9084-07553be34931}">
 			<IDSymbol name="MemberMenuGroup" value="0x1020" />
 			<IDSymbol name="MainMemberMenuGroup" value="0x1021" />
+            <IDSymbol name="GraphMemberMenuGroup" value="0x1022" />
 			<IDSymbol name="MainMemberMenu" value="0x0100" />
 			<IDSymbol name="CommandId_ShowIL" value="0x0101" />
 			<IDSymbol name="CommandId_ShowTAC" value="0x0102" />
 			<IDSymbol name="CommandId_ShowWebs" value="0x0103" />
 			<IDSymbol name="CommandId_ShowSSA" value="0x0104" />
 			<IDSymbol name="CommandId_ShowCFG" value="0x0105" />
-		</GuidSymbol>
+            <IDSymbol name="CommandId_ShowPTG" value="0x0106" />
+        </GuidSymbol>
 
 		<GuidSymbol name="guidImages" value="{da3c259a-0d1e-4e97-bf32-09a2b9c78937}" >
 			<IDSymbol name="bmpPic1" value="1" />

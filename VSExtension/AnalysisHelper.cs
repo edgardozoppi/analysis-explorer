@@ -80,13 +80,6 @@ namespace VSExtension
 			return result;
 		}
 
-		public string GenerateCFG(MethodDefinition method)
-		{
-			var cfg = GetCFG(method, out MethodBody body);
-			var result = DGMLSerializer.Serialize(cfg);
-			return result;
-		}
-
 		public string GenerateWebs(MethodDefinition method)
 		{
 			GetWebs(method, out MethodBody body);
@@ -101,7 +94,21 @@ namespace VSExtension
 			return result;
 		}
 
-		private MethodBody GetTAC(MethodDefinition method)
+        public string GenerateCFG(MethodDefinition method)
+        {
+            var cfg = GetCFG(method, out MethodBody body);
+            var result = DGMLSerializer.Serialize(cfg);
+            return result;
+        }
+
+        public string GeneratePTG(MethodDefinition method)
+        {
+            var ptg = GetPTG(method);
+            var result = DGMLSerializer.Serialize(ptg);
+            return result;
+        }
+
+        private MethodBody GetTAC(MethodDefinition method)
 		{
 			var dissasembler = new Disassembler(method);
 			var body = dissasembler.Execute();
@@ -163,5 +170,20 @@ namespace VSExtension
 			body.UpdateVariables();
 			return cfg;
 		}
-	}
+
+        private PointsToGraph GetPTG(MethodDefinition method)
+        {
+            var cfg = GetSSA(method, out MethodBody body);
+
+            // Points-to
+            var pointsTo = new PointsToAnalysis(cfg, method);
+            var result = pointsTo.Analyze();
+
+            var ptg = result[cfg.Exit.Id].Output;
+            //ptg.RemoveVariablesExceptParameters();
+            //ptg.RemoveTemporalVariables();
+
+            return ptg;
+        }
+    }
 }

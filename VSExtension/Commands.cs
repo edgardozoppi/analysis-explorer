@@ -25,6 +25,7 @@ namespace VSExtension
         public const int CommandId_ShowWebs = 0x0103;
         public const int CommandId_ShowSSA = 0x0104;
         public const int CommandId_ShowCFG = 0x0105;
+        public const int CommandId_ShowPTG = 0x0106;
 
         /// <summary>
         /// Command menu group (command set GUID).
@@ -82,6 +83,11 @@ namespace VSExtension
 
                 menuCommandId = new CommandID(CommandSet, CommandId_ShowCFG);
                 menuItem = new OleMenuCommand((s, e) => OnCommand(ShowCFG), menuCommandId);
+                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                commandService.AddCommand(menuItem);
+
+                menuCommandId = new CommandID(CommandSet, CommandId_ShowPTG);
+                menuItem = new OleMenuCommand((s, e) => OnCommand(ShowPTG), menuCommandId);
                 menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
                 commandService.AddCommand(menuItem);
             }
@@ -213,8 +219,15 @@ namespace VSExtension
                     }
                     else if (item is CodeProperty property)
                     {
-                        ShowFile(helper, property.Getter, generate, kind, extension);
-                        ShowFile(helper, property.Setter, generate, kind, extension);
+                        if (property.Getter != null)
+                        {
+                            ShowFile(helper, property.Getter, generate, kind, extension);
+                        }
+
+                        if (property.Setter != null)
+                        {
+                            ShowFile(helper, property.Setter, generate, kind, extension);
+                        }
                     }
                 }
             }
@@ -270,10 +283,12 @@ namespace VSExtension
 
         private void ShowTAC() => ShowFile((helper, method) => helper.GenerateTAC(method), "TAC", "txt");
 
-        private void ShowCFG() => ShowFile((helper, method) => helper.GenerateCFG(method), "CFG", "dgml");
-
         private void ShowWebs() => ShowFile((helper, method) => helper.GenerateWebs(method), "Webs", "txt");
 
         private void ShowSSA() => ShowFile((helper, method) => helper.GenerateSSA(method), "SSA", "txt");
+
+        private void ShowCFG() => ShowFile((helper, method) => helper.GenerateCFG(method), "CFG", "dgml");
+
+        private void ShowPTG() => ShowFile((helper, method) => helper.GeneratePTG(method), "PTG", "dgml");
     }
 }
