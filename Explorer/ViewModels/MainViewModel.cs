@@ -196,16 +196,35 @@ namespace Explorer
 				domAnalysis.Analyze();
 				domAnalysis.GenerateDominanceTree();
 
-				var loopAnalysis = new NaturalLoopAnalysis(cfg);
-				loopAnalysis.Analyze();
+				//var loopAnalysis = new NaturalLoopAnalysis(cfg);
+				//loopAnalysis.Analyze();
 
 				var domFrontierAnalysis = new DominanceFrontierAnalysis(cfg);
 				domFrontierAnalysis.Analyze();
+
+				var pdomAnalysis = new PostDominanceAnalysis(cfg);
+				pdomAnalysis.Analyze();
+				pdomAnalysis.GeneratePostDominanceTree();
+
+				var pdomFrontierAnalysis = new PostDominanceFrontierAnalysis(cfg);
+				pdomFrontierAnalysis.Analyze();
+
+				var controlDependenceAnalysis = new ControlDependenceAnalysis(cfg);
+				controlDependenceAnalysis.Analyze();
 
 				var text = DGMLSerializer.Serialize(cfg);
 
 				methodInfo.Add("CFG", cfg);
 				methodInfo.Add("CFG_TEXT", text);
+
+				text = DGMLSerializer.SerializeDominanceTree(cfg);
+				methodInfo.Add("DT_TEXT", text);
+
+				text = DGMLSerializer.SerializePostDominanceTree(cfg);
+				methodInfo.Add("PDT_TEXT", text);
+
+				text = DGMLSerializer.SerializeControlDependenceGraph(cfg);
+				methodInfo.Add("CDG_TEXT", text);
 			}
 		}
 
@@ -236,6 +255,15 @@ namespace Explorer
 
 				text = DGMLSerializer.Serialize(cfg);
 				methodInfo.Set("CFG_TEXT", text);
+
+				text = DGMLSerializer.SerializeDominanceTree(cfg);
+				methodInfo.Set("DT_TEXT", text);
+
+				text = DGMLSerializer.SerializePostDominanceTree(cfg);
+				methodInfo.Set("PDT_TEXT", text);
+
+				text = DGMLSerializer.SerializeControlDependenceGraph(cfg);
+				methodInfo.Set("CDG_TEXT", text);
 			}
 		}
 
@@ -268,6 +296,15 @@ namespace Explorer
 
 				text = DGMLSerializer.Serialize(cfg);
 				methodInfo.Set("CFG_TEXT", text);
+
+				text = DGMLSerializer.SerializeDominanceTree(cfg);
+				methodInfo.Set("DT_TEXT", text);
+
+				text = DGMLSerializer.SerializePostDominanceTree(cfg);
+				methodInfo.Set("PDT_TEXT", text);
+
+				text = DGMLSerializer.SerializeControlDependenceGraph(cfg);
+				methodInfo.Set("CDG_TEXT", text);
 			}
 		}
 
@@ -301,15 +338,16 @@ namespace Explorer
 
 		private void OnOpen(object obj)
 		{
-#if DEBUG
-			LoadAssembly(@"C:\Users\Edgar\Projects\Consume-Net\Tool2\Input\Samples.exe");
-			return;
-#endif
+//#if DEBUG
+//			LoadAssembly(@"C:\Users\Edgar\Projects\Consume-Net\Tool2\Input\Samples.exe");
+//			return;
+//#endif
 			var dialog = new OpenFileDialog()
 			{
 				Multiselect = true,
 				Filter = "Executable files (*.exe; *.dll)|*.exe; *.dll|Assembly files (*.dll)|*.dll|All files (*.*)|*.*",
-				InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+				//InitialDirectory = Environment.CurrentDirectory
+				//InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
 			};
 
 			var ok = dialog.ShowDialog();
