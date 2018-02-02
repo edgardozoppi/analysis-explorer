@@ -278,6 +278,9 @@ namespace Explorer
 			AddCommand("Show _SSA", ModifierKeys.Control, Key.S, OnShowSSA, OnCanShowBody);
 			AddSeparator();
 			AddCommand("Show _CFG", ModifierKeys.Control, Key.F, OnShowCFG, OnCanShowBody);
+			AddCommand("Show _DT", ModifierKeys.Control, Key.D, OnShowDT, OnCanShowBody);
+			AddCommand("Show _PDT", ModifierKeys.Control, Key.T, OnShowPDT, OnCanShowBody);
+			AddCommand("Show _CDG", ModifierKeys.Control, Key.G, OnShowCDG, OnCanShowBody);
 			AddCommand("Show _PTG", ModifierKeys.Control, Key.P, OnShowPTG, OnCanShowBody);
 			//AddCommand("Show _ESC", ModifierKeys.Control, Key.E, OnShowESC, OnCanShowBody);
 		}
@@ -350,6 +353,33 @@ namespace Explorer
 
 			var text = this.Main.GetMethodInfo<string>(method, "CFG_TEXT");
 			var document = new GraphDocumentViewModel(this.Main, "CFG", this.FullName, text, "EfficientSugiyama");
+			this.Main.AddDocument(document);
+		}
+
+		private void OnShowDT(object obj)
+		{
+			this.Main.GenerateCFG(method);
+
+			var text = this.Main.GetMethodInfo<string>(method, "DT_TEXT");
+			var document = new GraphDocumentViewModel(this.Main, "DT", this.FullName, text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
+			this.Main.AddDocument(document);
+		}
+
+		private void OnShowPDT(object obj)
+		{
+			this.Main.GenerateCFG(method);
+
+			var text = this.Main.GetMethodInfo<string>(method, "PDT_TEXT");
+			var document = new GraphDocumentViewModel(this.Main, "PDT", this.FullName, text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
+			this.Main.AddDocument(document);
+		}
+
+		private void OnShowCDG(object obj)
+		{
+			this.Main.GenerateCFG(method);
+
+			var text = this.Main.GetMethodInfo<string>(method, "CDG_TEXT");
+			var document = new GraphDocumentViewModel(this.Main, "CDG", this.FullName, text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
 			this.Main.AddDocument(document);
 		}
 
