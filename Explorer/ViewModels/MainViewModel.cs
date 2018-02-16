@@ -366,7 +366,7 @@ namespace Explorer
 			Application.Current.MainWindow.Close();
 		}
 
-		private void LoadAssembly(string fileName)
+		public void LoadAssembly(string fileName)
 		{
 			var assembly = loader.LoadAssembly(fileName);
 			var vm = new AssemblyViewModel(this, assembly);

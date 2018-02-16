@@ -61,6 +61,34 @@ namespace Explorer
 			}
 		}
 
+		private void TreeView_Drop(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				var main = this.DataContext as MainViewModel;
+				var fileNames = e.Data.GetData(DataFormats.FileDrop) as IEnumerable<string>;
+				fileNames = fileNames.Where(fn => fn.EndsWith(".exe") || fn.EndsWith(".dll"));
+
+				foreach (var fileName in fileNames)
+				{
+					main.LoadAssembly(fileName);
+				}
+			}
+		}
+
+		private void TreeView_PreviewDrop(object sender, DragEventArgs e)
+		{
+			var ok = false;
+
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				var fileNames = (string[])e.Data.GetData(DataFormats.FileDrop);
+				ok = fileNames.Any(fn => fn.EndsWith(".exe") || fn.EndsWith(".dll"));
+			}
+
+			e.Handled = !ok;
+		}
+
 		//// Borrar referencia a System.Drawing.dll
 		//private void Test(string fileName)
 		//{
