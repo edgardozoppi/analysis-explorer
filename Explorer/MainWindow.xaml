@@ -314,6 +314,9 @@
 
 		<TreeView Grid.Column="0"
 				  Grid.Row="2"
+				  AllowDrop="True"
+				  PreviewDrop="TreeView_PreviewDrop"
+				  Drop="TreeView_Drop"
 				  ItemsSource="{Binding Assemblies}"
 				  local:TreeViewHelper.SelectedItem="{Binding ActiveItem, Mode=TwoWay}" />
 
