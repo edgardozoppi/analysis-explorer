@@ -361,7 +361,7 @@ namespace Explorer
 			this.Main.GenerateCFG(method);
 
 			var text = this.Main.GetMethodInfo<string>(method, "DT_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "DT", this.FullName, text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
+			var document = new GraphDocumentViewModel(this.Main, "DT", this.FullName, text, "EfficientSugiyama");
 			this.Main.AddDocument(document);
 		}
 
@@ -370,7 +370,7 @@ namespace Explorer
 			this.Main.GenerateCFG(method);
 
 			var text = this.Main.GetMethodInfo<string>(method, "PDT_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "PDT", this.FullName, text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
+			var document = new GraphDocumentViewModel(this.Main, "PDT", this.FullName, text, "EfficientSugiyama");
 			this.Main.AddDocument(document);
 		}
 
@@ -379,7 +379,7 @@ namespace Explorer
 			this.Main.GenerateCFG(method);
 
 			var text = this.Main.GetMethodInfo<string>(method, "CDG_TEXT");
-			var document = new GraphDocumentViewModel(this.Main, "CDG", this.FullName, text, LayoutAlgorithmTypeEnum.EfficientSugiyama);
+			var document = new GraphDocumentViewModel(this.Main, "CDG", this.FullName, text, "EfficientSugiyama");
 			this.Main.AddDocument(document);
 		}
 
