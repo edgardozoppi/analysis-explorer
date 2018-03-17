@@ -40,7 +40,8 @@ namespace Explorer
 			AddCommand("File", "_Exit", ModifierKeys.Alt, Key.F4, OnExit);
 
 			host = new Host();
-			loader = new CCIProvider.Loader(host);
+			//loader = new CCIProvider.Loader(host);
+			loader = new AsmProvider.Loader(host);
 			programInfo = new ProgramAnalysisInfo();
 
 			PlatformTypes.Resolve(host);
@@ -345,7 +346,7 @@ namespace Explorer
 			var dialog = new OpenFileDialog()
 			{
 				Multiselect = true,
-				Filter = "Executable files (*.exe; *.dll)|*.exe; *.dll|Assembly files (*.dll)|*.dll|All files (*.*)|*.*",
+				Filter = "Executable files (*.exe; *.dll)|*.exe; *.dll|Assembly files (*.dll)|*.dll|Java archives (*.jar)|*.jar|All files (*.*)|*.*",
 				//InitialDirectory = Environment.CurrentDirectory
 				//InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
 			};

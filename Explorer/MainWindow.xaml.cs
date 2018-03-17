@@ -67,7 +67,7 @@ namespace Explorer
 			{
 				var main = this.DataContext as MainViewModel;
 				var fileNames = e.Data.GetData(DataFormats.FileDrop) as IEnumerable<string>;
-				fileNames = fileNames.Where(fn => fn.EndsWith(".exe") || fn.EndsWith(".dll"));
+				fileNames = fileNames.Where(fn => fn.EndsWith(".exe") || fn.EndsWith(".dll") || fn.EndsWith(".jar"));
 
 				foreach (var fileName in fileNames)
 				{
@@ -83,7 +83,7 @@ namespace Explorer
 			if (e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
 				var fileNames = (string[])e.Data.GetData(DataFormats.FileDrop);
-				ok = fileNames.Any(fn => fn.EndsWith(".exe") || fn.EndsWith(".dll"));
+				ok = fileNames.Any(fn => fn.EndsWith(".exe") || fn.EndsWith(".dll") || fn.EndsWith(".jar"));
 			}
 
 			e.Handled = !ok;
