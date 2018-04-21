@@ -156,6 +156,7 @@ namespace Explorer
 
 			if (!methodInfo.Contains("IL_TEXT"))
 			{
+				//method.Body.RemoveUnusedLabels(); // Optional
 				var text = method.Body.ToString();
 
 				methodInfo.Add("IL_TEXT", text);
@@ -172,6 +173,7 @@ namespace Explorer
 			{
 				var dissasembler = new Disassembler(method);
 				method.Body = dissasembler.Execute();
+				//method.Body.RemoveUnusedLabels(); // Optional
 				var text = method.Body.ToString();
 
 				methodInfo.Add("TAC_TEXT", text);
