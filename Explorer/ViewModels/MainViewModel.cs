@@ -198,6 +198,7 @@ namespace Explorer
 				domAnalysis.Analyze();
 				domAnalysis.GenerateDominanceTree();
 
+				//// Optional
 				//var loopAnalysis = new NaturalLoopAnalysis(cfg);
 				//loopAnalysis.Analyze();
 
@@ -251,6 +252,16 @@ namespace Explorer
 
 				var typeAnalysis = new TypeInferenceAnalysis(cfg);
 				typeAnalysis.Analyze();
+
+				//// Optional
+				//var forwardCopyAnalysis = new ForwardCopyPropagationAnalysis(cfg);
+				//forwardCopyAnalysis.Analyze();
+				//forwardCopyAnalysis.Transform(method.Body);
+
+				//// Optional
+				//var backwardCopyAnalysis = new BackwardCopyPropagationAnalysis(cfg);
+				//backwardCopyAnalysis.Analyze();
+				//backwardCopyAnalysis.Transform(method.Body);
 
 				var text = method.Body.ToString();
 				methodInfo.Add("WEBS_TEXT", text);
