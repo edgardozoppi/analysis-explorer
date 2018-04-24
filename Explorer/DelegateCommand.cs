@@ -5,6 +5,7 @@ namespace Explorer
 {
 	class DelegateCommand : ICommand
 	{
+		private bool lastCanExecute;
 		private Func<object, bool> OnCanExecute;
 		private Action<object> OnClose;
 
@@ -23,6 +24,16 @@ namespace Explorer
 			if (OnCanExecute != null)
 			{
 				result = OnCanExecute(parameter);
+			}
+
+			if (result != lastCanExecute)
+			{
+				lastCanExecute = result;
+
+				if (CanExecuteChanged != null)
+				{
+					CanExecuteChanged(this, EventArgs.Empty);
+				}
 			}
 
 			return result;
