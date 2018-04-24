@@ -9,7 +9,6 @@ using Model.Types;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -24,20 +23,30 @@ namespace Explorer
 
 		private ItemViewModelBase activeItem;
 		private DocumentViewModelBase activeDocument;
+		private OptionsViewModel options;
 
 		public ObservableCollection<AssemblyViewModel> Assemblies { get; private set; }
 		public ObservableCollection<DocumentViewModelBase> Documents { get; private set; }
-		public IList<UIDelegateCommand> Commands { get; private set; }
+		public IList<IUICommand> Commands { get; private set; }
+
+		// Options
+		public bool RemoveUnusedLabels { get; set; }
+		public bool RunForwardCopyPropagation { get; private set; }
+		public bool RunBackwardCopyPropagation { get; private set; }
 
 		public MainViewModel()
 		{
 			this.Assemblies = new ObservableCollection<AssemblyViewModel>();
 			this.Documents = new ObservableCollection<DocumentViewModelBase>();
 
-			this.Commands = new List<UIDelegateCommand>();
-			AddCommand("File|ToolBar", "_Open", ModifierKeys.Control, Key.O, OnOpen);
-			AddSeparator();
+			this.Commands = new List<IUICommand>();
+			AddCommand("File|ToolBar", "_Open", ModifierKeys.Control, Key.O, OnOpen, icon: "Images/open.png");
+			AddSeparator("File");
 			AddCommand("File", "_Exit", ModifierKeys.Alt, Key.F4, OnExit);
+			AddCommand("View|ToolBar", "_Options", ModifierKeys.Control, Key.T, OnOptions, icon: "Images/options.png");
+			AddSeparator("ToolBar");
+
+			options = new OptionsViewModel(this);
 
 			host = new Host();
 			loader = new CCIProvider.Loader(host);
@@ -46,26 +55,22 @@ namespace Explorer
 			PlatformTypes.Resolve(host);
 		}
 
-		//public IEnumerable<ICommand> FileCommands
-		//{
-		//	get { return this.Commands.OfType<UIDelegateCommand>().Where(c => c.Category == "File"); }
-		//}
-
-		public IEnumerable<ICommand> FileCommands
+		public IEnumerable<IUICommand> FileCommands
 		{
-			get
-			{
-				return this.Commands.SkipWhile(c => c == null || !c.Category.Contains("File"))
-									.TakeWhile(c => c == null || c.Category.Contains("File"));
-			}
+			get { return this.Commands.Where(c => c.Category.Contains("File")); }
 		}
 
-		public IEnumerable<ICommand> ToolBarCommands
+		public IEnumerable<IUICommand> ViewCommands
+		{
+			get { return this.Commands.Where(c => c.Category.Contains("View")); }
+		}
+
+		public IEnumerable<IUICommand> ToolBarCommands
 		{
 			get
 			{
-				var commands = this.Commands.SkipWhile(c => c == null || !c.Category.Contains("ToolBar"))
-											.TakeWhile(c => c == null || c.Category.Contains("ToolBar"));
+				var commands = this.Commands.Where(c => c.Category.Contains("ToolBar"));
+
 				if (activeItem != null)
 				{
 					commands = commands.Concat(activeItem.Commands);
@@ -73,11 +78,6 @@ namespace Explorer
 
 				return commands;
 			}
-		}
-
-		public Host Host
-		{
-			get { return host; }
 		}
 
 		public ItemViewModelBase ActiveItem
@@ -156,7 +156,11 @@ namespace Explorer
 
 			if (!methodInfo.Contains("IL_TEXT"))
 			{
-				//method.Body.RemoveUnusedLabels(); // Optional
+				if (options.RemoveUnusedLabels)
+				{
+					method.Body.RemoveUnusedLabels();
+				}
+
 				var text = method.Body.ToString();
 
 				methodInfo.Add("IL_TEXT", text);
@@ -173,7 +177,12 @@ namespace Explorer
 			{
 				var dissasembler = new Disassembler(method);
 				method.Body = dissasembler.Execute();
-				//method.Body.RemoveUnusedLabels(); // Optional
+
+				if (options.RemoveUnusedLabels)
+				{
+					method.Body.RemoveUnusedLabels();
+				}
+
 				var text = method.Body.ToString();
 
 				methodInfo.Add("TAC_TEXT", text);
@@ -253,15 +262,19 @@ namespace Explorer
 				var typeAnalysis = new TypeInferenceAnalysis(cfg);
 				typeAnalysis.Analyze();
 
-				//// Optional
-				//var forwardCopyAnalysis = new ForwardCopyPropagationAnalysis(cfg);
-				//forwardCopyAnalysis.Analyze();
-				//forwardCopyAnalysis.Transform(method.Body);
+				if (options.RunForwardCopyPropagation)
+				{
+					var forwardCopyAnalysis = new ForwardCopyPropagationAnalysis(cfg);
+					forwardCopyAnalysis.Analyze();
+					forwardCopyAnalysis.Transform(method.Body);
+				}
 
-				//// Optional
-				//var backwardCopyAnalysis = new BackwardCopyPropagationAnalysis(cfg);
-				//backwardCopyAnalysis.Analyze();
-				//backwardCopyAnalysis.Transform(method.Body);
+				if (options.RunBackwardCopyPropagation)
+				{
+					var backwardCopyAnalysis = new BackwardCopyPropagationAnalysis(cfg);
+					backwardCopyAnalysis.Analyze();
+					backwardCopyAnalysis.Transform(method.Body);
+				}
 
 				var text = method.Body.ToString();
 				methodInfo.Add("WEBS_TEXT", text);
@@ -363,7 +376,7 @@ namespace Explorer
 				//InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
 			};
 
-			var ok = dialog.ShowDialog();
+			var ok = dialog.ShowDialog(Application.Current.MainWindow);
 
 			if (ok.HasValue && ok.Value)
 			{
@@ -379,6 +392,46 @@ namespace Explorer
 			Application.Current.MainWindow.Close();
 		}
 
+		private void OnOptions(object obj)
+		{
+			options.LoadOptions();
+			var dialog = new OptionsDialog(options);
+			var ok = dialog.ShowDialog();
+
+			if (ok.HasValue && ok.Value)
+			{
+				this.ApplyOptions();
+			}
+		}
+
+		public void ApplyOptions()
+		{
+			var changed = false;
+
+			if (this.RemoveUnusedLabels != options.RemoveUnusedLabels)
+			{
+				this.RemoveUnusedLabels = options.RemoveUnusedLabels;
+				changed = true;
+			}
+
+			if (this.RunForwardCopyPropagation != options.RunForwardCopyPropagation)
+			{
+				this.RunForwardCopyPropagation = options.RunForwardCopyPropagation;
+				changed = true;
+			}
+
+			if (this.RunBackwardCopyPropagation != options.RunBackwardCopyPropagation)
+			{
+				this.RunBackwardCopyPropagation = options.RunBackwardCopyPropagation;
+				changed = true;
+			}
+
+			if (changed)
+			{
+				programInfo.Clear();
+			}
+		}
+
 		public void LoadAssembly(string fileName)
 		{
 			var assembly = loader.LoadAssembly(fileName);
@@ -387,15 +440,27 @@ namespace Explorer
 			this.ActiveItem = vm;
 		}
 
-		protected void AddSeparator()
+		protected UICommandSeparator AddSeparator(string category)
 		{
-			this.Commands.Add(null);
+			var command = new UICommandSeparator(category);
+			this.Commands.Add(command);
+			return command;
 		}
 
-		private UIDelegateCommand AddCommand(string category, string name, ModifierKeys modifiers, Key key, Action<object> action, Func<object, bool> enabled = null)
+		private MenuCommand AddCommand(string category, string name, ModifierKeys modifiers, Key key, Action<object> action, Func<object, bool> enabled = null, string icon = null)
 		{
+			MenuCommand command;
 			var shortcut = new KeyGesture(key, modifiers);
-			var command = new UIDelegateCommand(category, name, shortcut, action, enabled);
+
+			if (icon != null)
+			{
+				command = new ToolBarCommand(category, name, icon, shortcut, action, enabled);
+			}
+			else
+			{
+				command = new MenuCommand(category, name, icon, shortcut, action, enabled);
+			}
+
 			this.Commands.Add(command);
 			return command;
 		}

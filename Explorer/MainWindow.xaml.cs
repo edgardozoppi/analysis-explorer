@@ -36,15 +36,19 @@ namespace Explorer
 			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\none.png");
 			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\close.png");
 			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\save.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\open.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\options.png");
 
 			RegisterCommandShortcuts(main);
 		}
 
 		private void RegisterCommandShortcuts(MainViewModel main)
 		{
-			foreach (var command in main.Commands)
+			foreach (var item in main.Commands)
 			{
-				if (command == null) continue;
+				if (item.IsSeparator) continue;
+
+				var command = item as MenuCommand;
 				var inputBinding = new InputBinding(command, command.Shortcut);
 				this.InputBindings.Add(inputBinding);
 			}

@@ -15,6 +15,7 @@
 		<local:UniversalValueConverter x:Key="UniversalValueConverter" />
 		<local:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
 		<local:BooleanAndConverter x:Key="BooleanAndConverter" />
+		<local:PathToImageConverter x:Key="PathToImageConverter" />
 
 		<local:MapReduceConverter x:Key="GridSplitterVisibilityConverter"
 								  Map="{StaticResource BooleanAndConverter}"
@@ -32,6 +33,7 @@
 				<Setter Property="Command" Value="{Binding}" />
 				<Setter Property="Header" Value="{Binding Name}" />
 				<Setter Property="InputGestureText" Value="{Binding ShortcutText}" />
+				<Setter Property="Icon" Value="{Binding IconPath, Converter={StaticResource PathToImageConverter}}" />
 			</Style>
 
 			<local:MenuItemTemplateSelector x:Key="MenuItemTemplateSelector"
@@ -43,10 +45,18 @@
 				<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
 			</DataTemplate>
 
-			<DataTemplate DataType="{x:Type local:UIDelegateCommand}">
+			<DataTemplate DataType="{x:Type local:MenuCommand}">
 				<Button Command="{Binding}"
-						Content="{Binding DisplayName}"						
+						Content="{Binding DisplayName}"
 						Style="{DynamicResource ResourceKey={x:Static ToolBar.ButtonStyleKey}}" />
+			</DataTemplate>
+
+			<DataTemplate DataType="{x:Type local:ToolBarCommand}">
+				<Button Command="{Binding}"
+						ToolTip="{Binding DisplayName}"
+						Style="{DynamicResource ResourceKey={x:Static ToolBar.ButtonStyleKey}}">
+					<Image Source="{Binding IconPath}" />
+				</Button>
 			</DataTemplate>
 
 			<local:ToolBarItemTemplateSelector x:Key="ToolBarItemTemplateSelector"
@@ -300,6 +310,12 @@
 			  Background="Transparent">
 			<MenuItem Header="_File"
 					  ItemsSource="{Binding FileCommands}"
+					  UsesItemContainerTemplate="True"
+					  ItemContainerTemplateSelector="{DynamicResource MenuItemTemplateSelector}"
+					  Resources="{StaticResource MenuResources}" />
+			
+			<MenuItem Header="_View"
+					  ItemsSource="{Binding ViewCommands}"
 					  UsesItemContainerTemplate="True"
 					  ItemContainerTemplateSelector="{DynamicResource MenuItemTemplateSelector}"
 					  Resources="{StaticResource MenuResources}" />

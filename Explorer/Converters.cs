@@ -6,7 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 
 namespace Explorer
 {
@@ -108,6 +110,30 @@ namespace Explorer
 			{
 				return value;
 			}
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public class PathToImageConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			Image image = null;
+			var path = value as string;
+
+			if (path != null)
+			{
+				image = new Image()
+				{
+					Source = new BitmapImage(new Uri(path, UriKind.RelativeOrAbsolute))
+				};
+			}
+
+			return image;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

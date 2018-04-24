@@ -7,13 +7,13 @@ namespace Explorer
 	{
 		private bool lastCanExecute;
 		private Func<object, bool> OnCanExecute;
-		private Action<object> OnClose;
+		private Action<object> OnExecute;
 
 		public event EventHandler CanExecuteChanged;
 
-		public DelegateCommand(Action<object> OnClose, Func<object, bool> OnCanExecute = null)
+		public DelegateCommand(Action<object> OnExecute, Func<object, bool> OnCanExecute = null)
 		{
-			this.OnClose = OnClose;
+			this.OnExecute = OnExecute;
 			this.OnCanExecute = OnCanExecute;
 		}
 
@@ -41,7 +41,7 @@ namespace Explorer
 
 		public void Execute(object parameter)
 		{
-			OnClose(parameter);
+			OnExecute(parameter);
 		}
 	}
 }

@@ -23,13 +23,13 @@ namespace Explorer
 		public abstract string Icon { get; }
 
 		public ObservableCollection<ItemViewModelBase> Childs { get; private set; }
-		public ObservableCollection<UIDelegateCommand> Commands { get; private set; }
+		public ObservableCollection<IUICommand> Commands { get; private set; }
 
 		public ItemViewModelBase(MainViewModel main)
 		{
 			this.Main = main;
 			this.Childs = new ObservableCollection<ItemViewModelBase>();
-			this.Commands = new ObservableCollection<UIDelegateCommand>();
+			this.Commands = new ObservableCollection<IUICommand>();
 		}
 
 		public bool HasCommands
@@ -37,15 +37,17 @@ namespace Explorer
 			get { return this.Commands.Count > 0; }
 		}
 
-		protected void AddSeparator()
+		protected UICommandSeparator AddSeparator()
 		{
-			this.Commands.Add(null);
+			var command = new UICommandSeparator(null);
+			this.Commands.Add(command);
+			return command;
 		}
 
-		protected UIDelegateCommand AddCommand(string name, ModifierKeys modifiers, Key key, Action<object> action, Func<object, bool> enabled = null)
+		protected MenuCommand AddCommand(string name, ModifierKeys modifiers, Key key, Action<object> action, Func<object, bool> enabled = null)
 		{
 			var shortcut = new KeyGesture(key, modifiers);
-			var command = new UIDelegateCommand(name, shortcut, action, enabled);
+			var command = new MenuCommand(null, name, null, shortcut, action, enabled);
 			this.Commands.Add(command);
 			return command;
 		}

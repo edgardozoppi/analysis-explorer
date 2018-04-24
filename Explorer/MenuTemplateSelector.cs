@@ -16,7 +16,7 @@ namespace Explorer
 		{
 			DataTemplate result;
 
-			if (item == null)
+			if (item is UICommandSeparator)
 			{
 				result = this.SeparatorTemplate;
 			}
@@ -37,7 +37,7 @@ namespace Explorer
 		{
 			DataTemplate result;
 
-			if (item == null)
+			if (item is UICommandSeparator)
 			{
 				result = this.SeparatorTemplate;
 			}
