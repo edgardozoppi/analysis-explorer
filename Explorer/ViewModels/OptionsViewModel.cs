@@ -10,6 +10,7 @@ namespace Explorer
 	{
 		public MainViewModel Main { get; private set; }
 		public bool RemoveUnusedLabels { get; set; }
+		public bool GenerateExceptionalControlFlow { get; set; }
 		public bool RunForwardCopyPropagation { get; set; }
 		public bool RunBackwardCopyPropagation { get; set; }
 
@@ -21,6 +22,7 @@ namespace Explorer
 		public void LoadOptions()
 		{
 			this.RemoveUnusedLabels = this.Main.RemoveUnusedLabels;
+			this.GenerateExceptionalControlFlow = this.Main.GenerateExceptionalControlFlow;
 			this.RunForwardCopyPropagation = this.Main.RunForwardCopyPropagation;
 			this.RunBackwardCopyPropagation = this.Main.RunBackwardCopyPropagation;
 		}

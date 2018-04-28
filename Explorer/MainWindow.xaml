@@ -53,7 +53,7 @@
 
 			<DataTemplate DataType="{x:Type local:ToolBarCommand}">
 				<Button Command="{Binding}"
-						ToolTip="{Binding DisplayName}"
+						ToolTip="{Binding ToolTip}"
 						Style="{DynamicResource ResourceKey={x:Static ToolBar.ButtonStyleKey}}">
 					<Image Source="{Binding IconPath}" />
 				</Button>

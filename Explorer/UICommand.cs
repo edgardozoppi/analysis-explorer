@@ -63,5 +63,10 @@ namespace Explorer
 			: base(category, name, iconPath, shortcut, OnExecute, OnCanExecute)
 		{
 		}
+
+		public string ToolTip
+		{
+			get { return string.Format("{0} ({1})", this.DisplayName, this.ShortcutText); }
+		}
 	}
 }

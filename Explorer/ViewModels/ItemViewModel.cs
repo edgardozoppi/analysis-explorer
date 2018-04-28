@@ -117,7 +117,7 @@ namespace Explorer
 
 		public override string Icon
 		{
-			get { return @"Images\assembly.png"; }
+			get { return @"Images\assembly2.png"; }
 		}
 
 		private void OnShowCH(object obj)
@@ -255,7 +255,7 @@ namespace Explorer
 
 		public override string Name
 		{
-			get { return field.Name; }
+			get { return string.Format("{0} : {1}", field.Name, field.Type); }
 		}
 
 		public override string Icon
@@ -282,7 +282,7 @@ namespace Explorer
 			AddSeparator();
 			AddCommand("Show _CFG", ModifierKeys.Control, Key.F, OnShowCFG, OnCanShowBody);
 			AddCommand("Show _DT", ModifierKeys.Control, Key.D, OnShowDT, OnCanShowBody);
-			AddCommand("Show _PDT", ModifierKeys.Control, Key.T, OnShowPDT, OnCanShowBody);
+			AddCommand("Show _PDT", ModifierKeys.Control, Key.Y, OnShowPDT, OnCanShowBody);
 			AddCommand("Show _CDG", ModifierKeys.Control, Key.G, OnShowCDG, OnCanShowBody);
 			AddCommand("Show _PTG", ModifierKeys.Control, Key.P, OnShowPTG, OnCanShowBody);
 			//AddCommand("Show _ESC", ModifierKeys.Control, Key.E, OnShowESC, OnCanShowBody);
@@ -295,7 +295,7 @@ namespace Explorer
 
 		public override string Name
 		{
-			get { return method.ToDisplayName(); }
+			get { return string.Format("{0} : {1}", method.ToDisplayName(), method.ReturnType); }
 		}
 
 		public string FullName

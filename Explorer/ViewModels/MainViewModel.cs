@@ -30,7 +30,8 @@ namespace Explorer
 		public IList<IUICommand> Commands { get; private set; }
 
 		// Options
-		public bool RemoveUnusedLabels { get; set; }
+		public bool RemoveUnusedLabels { get; private set; }
+		public bool GenerateExceptionalControlFlow { get; private set; }
 		public bool RunForwardCopyPropagation { get; private set; }
 		public bool RunBackwardCopyPropagation { get; private set; }
 
@@ -43,7 +44,7 @@ namespace Explorer
 			AddCommand("File|ToolBar", "_Open", ModifierKeys.Control, Key.O, OnOpen, icon: "Images/open.png");
 			AddSeparator("File");
 			AddCommand("File", "_Exit", ModifierKeys.Alt, Key.F4, OnExit);
-			AddCommand("View|ToolBar", "_Options", ModifierKeys.Control, Key.T, OnOptions, icon: "Images/options.png");
+			AddCommand("View|ToolBar", "_Options", ModifierKeys.Control, Key.Q, OnOptions, icon: "Images/options.png");
 			AddSeparator("ToolBar");
 
 			options = new OptionsViewModel(this);
@@ -200,8 +201,16 @@ namespace Explorer
 			{
 				// Control-flow
 				var cfAnalysis = new ControlFlowAnalysis(method.Body);
-				var cfg = cfAnalysis.GenerateNormalControlFlow();
-				//var cfg = cfAnalysis.GenerateExceptionalControlFlow();
+				ControlFlowGraph cfg;
+
+				if (options.GenerateExceptionalControlFlow)
+				{
+					cfg = cfAnalysis.GenerateExceptionalControlFlow();
+				}
+				else
+				{
+					cfg = cfAnalysis.GenerateNormalControlFlow();
+				}
 
 				var domAnalysis = new DominanceAnalysis(cfg);
 				domAnalysis.Analyze();
@@ -411,6 +420,12 @@ namespace Explorer
 			if (this.RemoveUnusedLabels != options.RemoveUnusedLabels)
 			{
 				this.RemoveUnusedLabels = options.RemoveUnusedLabels;
+				changed = true;
+			}
+
+			if (this.GenerateExceptionalControlFlow != options.GenerateExceptionalControlFlow)
+			{
+				this.GenerateExceptionalControlFlow = options.GenerateExceptionalControlFlow;
 				changed = true;
 			}
 

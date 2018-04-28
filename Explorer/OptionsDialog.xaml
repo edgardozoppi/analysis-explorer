@@ -14,7 +14,7 @@
 		WindowStyle="SingleBorderWindow"
 		WindowStartupLocation="CenterOwner"
 		Width="300"
-		Height="170">
+		Height="190">
 	
 	<Window.Resources>
 		<SolidColorBrush x:Key="ControlBackground" Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}" />
@@ -32,6 +32,8 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="5" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="5" />
+			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 			<RowDefinition Height="20" />
 			<RowDefinition Height="Auto" />
@@ -44,15 +46,20 @@
 
 		<CheckBox Grid.Row="3"
 				  Grid.Column="0"
+				  IsChecked="{Binding GenerateExceptionalControlFlow}"
+				  Content="Generate Exceptional Control Flow" />
+
+		<CheckBox Grid.Row="5"
+				  Grid.Column="0"
 				  IsChecked="{Binding RunForwardCopyPropagation}"
 				  Content="Run Forward Copy Propagation analysis" />
 
-		<CheckBox Grid.Row="5"
+		<CheckBox Grid.Row="7"
 				  Grid.Column="0"
 				  IsChecked="{Binding RunBackwardCopyPropagation}"
 				  Content="Run Backward Copy Propagation analysis" />
 
-		<StackPanel Grid.Row="8"
+		<StackPanel Grid.Row="10"
 					Grid.Column="0"
 					Orientation="Horizontal"
 					HorizontalAlignment="Right">

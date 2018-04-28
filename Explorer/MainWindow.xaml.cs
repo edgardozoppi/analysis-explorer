@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,13 +39,26 @@ namespace Explorer
 			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\save.png");
 			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\open.png");
 			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\options.png");
+			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\assembly2.png");
 
-			RegisterCommandShortcuts(main);
+			RegisterCommandShortcuts(main.Commands);
+			main.PropertyChanged += Main_PropertyChanged;
 		}
 
-		private void RegisterCommandShortcuts(MainViewModel main)
+		private void Main_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			foreach (var item in main.Commands)
+			if (e.PropertyName == nameof(MainViewModel.ToolBarCommands))
+			{
+				var main = this.DataContext as MainViewModel;
+				RegisterCommandShortcuts(main.ToolBarCommands);
+			}
+		}
+
+		private void RegisterCommandShortcuts(IEnumerable<IUICommand> commands)
+		{
+			this.InputBindings.Clear();
+
+			foreach (var item in commands)
 			{
 				if (item.IsSeparator) continue;
 
