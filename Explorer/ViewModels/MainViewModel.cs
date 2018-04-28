@@ -20,6 +20,7 @@ namespace Explorer
 		private Host host;
 		private ILoader loader;
 		private ProgramAnalysisInfo programInfo;
+		private IDictionary<IMethodReference, MethodBody> originalMethodBodies;
 
 		private ItemViewModelBase activeItem;
 		private DocumentViewModelBase activeDocument;
@@ -52,6 +53,7 @@ namespace Explorer
 			host = new Host();
 			loader = new CCIProvider.Loader(host);
 			programInfo = new ProgramAnalysisInfo();
+			originalMethodBodies = new Dictionary<IMethodReference, MethodBody>(MethodReferenceDefinitionComparer.Default);
 
 			PlatformTypes.Resolve(host);
 		}
@@ -157,6 +159,8 @@ namespace Explorer
 
 			if (!methodInfo.Contains("IL_TEXT"))
 			{
+				EnsureMethodHasOriginalBody(method);
+
 				if (options.RemoveUnusedLabels)
 				{
 					method.Body.RemoveUnusedLabels();
@@ -453,6 +457,21 @@ namespace Explorer
 			var vm = new AssemblyViewModel(this, assembly);
 			this.Assemblies.Add(vm);
 			this.ActiveItem = vm;
+		}
+
+		private void EnsureMethodHasOriginalBody(MethodDefinition method)
+		{
+			MethodBody body;
+			var ok = originalMethodBodies.TryGetValue(method, out body);
+
+			if (ok)
+			{
+				method.Body = body;
+			}
+			else
+			{
+				originalMethodBodies.Add(method, method.Body);
+			}
 		}
 
 		protected UICommandSeparator AddSeparator(string category)
