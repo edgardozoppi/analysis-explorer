@@ -250,7 +250,7 @@ namespace Explorer
 
 				method.Body.UpdateVariables();
 
-				var typeAnalysis = new TypeInferenceAnalysis(cfg);
+				var typeAnalysis = new TypeInferenceAnalysis(cfg, method.ReturnType);
 				typeAnalysis.Analyze();
 
 				//// Optional
