@@ -160,6 +160,10 @@
       <Project>{d19d0c62-fb8c-427d-b6a4-8433ef3db6a5}</Project>
       <Name>CCIProvider</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Analysis-Net\MetadataProvider\MetadataProvider.csproj">
+      <Project>{7d94daac-e703-430d-bceb-d10e4c565ff8}</Project>
+      <Name>MetadataProvider</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Analysis-Net\Model\Model.csproj">
       <Project>{F08216AD-E55C-44B1-A253-AB8B024B7597}</Project>
       <Name>Model</Name>

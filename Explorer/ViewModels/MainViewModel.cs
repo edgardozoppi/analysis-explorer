@@ -51,7 +51,8 @@ namespace Explorer
 			options = new OptionsViewModel(this);
 
 			host = new Host();
-			loader = new CCIProvider.Loader(host);
+			//loader = new CCIProvider.Loader(host);
+			loader = new MetadataProvider.Loader(host);
 			programInfo = new ProgramAnalysisInfo();
 			originalMethodBodies = new Dictionary<IMethodReference, MethodBody>(MethodReferenceDefinitionComparer.Default);
 
