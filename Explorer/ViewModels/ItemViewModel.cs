@@ -195,9 +195,9 @@ namespace Explorer
 
 	class TypeViewModel : ItemViewModelBase
 	{
-		private ITypeDefinition type;
+		private TypeDefinition type;
 
-		public TypeViewModel(MainViewModel main, ITypeDefinition type)
+		public TypeViewModel(MainViewModel main, TypeDefinition type)
 			: base(main)
 		{
 			this.type = type;
@@ -223,9 +223,9 @@ namespace Explorer
 		{
 			ItemViewModelBase result = null;
 
-			if (member is ITypeDefinition)
+			if (member is TypeDefinition)
 			{
-				var type = member as ITypeDefinition;
+				var type = member as TypeDefinition;
 				result = new TypeViewModel(this.Main, type);
 			}
 			else if (member is FieldDefinition)
