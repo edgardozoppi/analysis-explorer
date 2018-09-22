@@ -260,7 +260,11 @@ namespace Explorer
 
 		public override string Icon
 		{
-			get { return @"Images\field.png"; }
+			get
+            {
+                var icon = field.IsStatic ? "static_field" : "field";
+                return string.Format(@"Images\{0}.png", icon);
+            }
 		}
 	}
 

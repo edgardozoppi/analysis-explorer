@@ -28,20 +28,21 @@ namespace Explorer
 			var main = new MainViewModel();
 			this.DataContext = main;
 
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\method.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\reference.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\field.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\class.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\namespace.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\assembly.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\none.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\close.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\save.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\open.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\options.png");
-			//Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\assembly2.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\method.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\reference.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\field.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\static_field.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\class.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\namespace.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\assembly.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\none.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\close.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\save.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\open.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\options.png");
+            //Test(@"C:\Users\Edgar\Projects\analysis-explorer\Explorer\Images\assembly2.png");
 
-			RegisterCommandShortcuts(main.Commands);
+            RegisterCommandShortcuts(main.Commands);
 			main.PropertyChanged += Main_PropertyChanged;
 		}
 
@@ -107,18 +108,18 @@ namespace Explorer
 			e.Handled = !ok;
 		}
 
-		//// Borrar referencia a System.Drawing.dll
-		//private void Test(string fileName)
-		//{
-		//	var myBitmap = new System.Drawing.Bitmap(fileName);
+        //// Borrar referencia a System.Drawing.dll
+        //private void Test(string fileName)
+        //{
+        //    var myBitmap = new System.Drawing.Bitmap(fileName);
 
-		//	// Get the color of a background pixel.
-		//	var backColor = myBitmap.GetPixel(0, 0);
+        //    // Get the color of a background pixel.
+        //    var backColor = myBitmap.GetPixel(0, 0);
 
-		//	// Make backColor transparent for myBitmap.
-		//	myBitmap.MakeTransparent(backColor);
+        //    // Make backColor transparent for myBitmap.
+        //    myBitmap.MakeTransparent(backColor);
 
-		//	myBitmap.Save(fileName);
-		//}
-	}
+        //    myBitmap.Save(fileName);
+        //}
+    }
 }
